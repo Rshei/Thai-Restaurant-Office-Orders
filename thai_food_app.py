@@ -30,7 +30,22 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# MENU DATABASE - updated to match restaurant menu
+# MENU DATABASE with categories
+MENU_CATEGORIES = {
+    "Suppen & Vorspeisen": ["1", "3", "5", "6", "7", "8", "18", "19", "20"],
+    "Gebratene Nudeln": ["21", "23", "24", "25", "26", "27", "28", "29"],
+    "Eierreis": ["31", "33", "34", "35", "36", "37", "38", "39"],
+    "Glasnudeln & Reisbandnudeln": ["40", "41", "42", "43", "47"],
+    "Chop Suey-Sauce": ["50", "51a", "51b", "52", "53", "54", "55"],
+    "Süß-Sauer-Sauce": ["56", "57a", "57b", "57c", "58", "59"],
+    "Rote Curry-Sauce": ["60", "61", "62", "63", "64", "65"],
+    "Mango-Sauce": ["80", "81", "83", "85"],
+    "Knoblauch-Sauce": ["90", "91", "92", "93", "95"],
+    "Ingwer-Sauce": ["100", "101", "102", "103", "105"],
+    "Zitronengras-Sauce": ["110", "111", "112", "113", "115"],
+    "Erdnuss-Sauce": ["120", "121", "123", "124"],
+}
+
 MENU = {
     # Suppen u. Vorspeisen
     "1":  {"name": "Eierblumensuppe (m. Hühnerfleisch)", "price": 3.00},
@@ -208,7 +223,6 @@ with col1:
                     "time": datetime.now().strftime("%H:%M"),
                 }
                 st.session_state.orders.append(order)
-                st.balloons()
                 st.success(f"✨ Awesome! Added {name}'s order!")
             else:
                 st.error("⚠️ Hold up! Please fill in your name!")

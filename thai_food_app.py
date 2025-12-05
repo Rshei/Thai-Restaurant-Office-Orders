@@ -13,7 +13,7 @@ st.title("🍜 Thai Restaurant Office Orders")
 st.markdown("### Order your lunch from our neighbor Thai restaurant!")
 
 # Menu link section
-st.info("📋 **Restaurant Menu**: [Click here to view the menu](https://example.com/menu) - Replace this link with your actual menu URL")
+st.info("📋 **Restaurant Menu**: [Click here to view the menu](https://www.google.com/maps/place/Thien+Thai+Bistro/@52.5364437,13.2723721,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDZruezGQ!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAG0ilSyjaUPfX_bg9cANspvtJgqf6qGUB3hTyNN8bkwRMCiCzpOZQn7hvozHQvIqqUefUHo5ywJ6ZYweysXOCSP05KNw_VqQlybBnJJgbh2Dn-3jtWL6ERtiGrE_n_geRKhC-eDcqPV7%3Dw146-h195-k-no!7i3000!8i4000!4m10!1m2!2m1!1ssiemens+damm!3m6!1s0x47a856c7885ec39d:0xe8d8c1bdc6419318!8m2!3d52.5362941!4d13.272357!10e9!16s%2Fg%2F11bxc5hddn?entry=ttu&g_ep=EgoyMDI1MTIwMi4wIKXMDSoASAFQAw%3D%3D) - Replace this link with your actual menu URL")
 
 # Main layout: Order form on left, Order summary on right
 col1, col2 = st.columns([2, 1])

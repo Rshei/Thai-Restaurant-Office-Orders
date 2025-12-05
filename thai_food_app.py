@@ -185,7 +185,7 @@ st.markdown(f"""
 st.markdown("""
     <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #f7b733 0%, #fc4a1a 100%);
     border-radius: 10px; margin-bottom: 2rem;'>
-        <h2 style='color: white; margin: 0;'>✨ Our special today is... The 'Mystery Meat Masala' (we're not entirely sure what's in it, but it's delicious ✨</h2>
+        <h2 style='color: white; margin: 0;'>✨ Our special today is... ✨</h2>
 """, unsafe_allow_html=True)
 
 

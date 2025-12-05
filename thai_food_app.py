@@ -195,7 +195,7 @@ for key in sorted_keys:
     dish_options.append((label, key))
 
 # Main layout: Order form on left, Order summary on right
-col1, col2 = st.columns([2, 1])
+col1, col2 = st.columns([1, 1])
 
 with col1:
     st.markdown("### 🎯 Place Your Order")
@@ -204,15 +204,16 @@ with col1:
         name = st.text_input("Your Name 👤", placeholder="Who's hungry?")
 
         # Select dish instead of free-text number
-        selected_label = st.selectbox(
+        selected_index = st.selectbox(
             "Choose your dish 🍽️",
-            options=[opt[0] for opt in dish_options],
+            options=range(len(dish_options)),
+            format_func=lambda i: dish_options[i][0],
             index=0
         )
         # Map back to menu number
-        selected_key = next(k for (label, k) in dish_options if label == selected_label)
+        selected_key = dish_options[selected_index][1]
         dish_info = MENU[selected_key]
-    st.info(f"✨ You chose: {selected_key}. {dish_info['name']} - €{dish_info['price']:.2f}")
+        st.info(f"✨ You chose: {selected_key}. {dish_info['name']} - €{dish_info['price']:.2f}")
 
         special_requests = st.text_area(
             "Special Requests 💬",

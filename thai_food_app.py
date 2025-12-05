@@ -182,17 +182,10 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # Special of the Day
-# Special of the Day
 st.markdown("""
     <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #f7b733 0%, #fc4a1a 100%);
     border-radius: 10px; margin-bottom: 2rem;'>
-        <h2 style='color: white; margin: 0;'>✨ Special of the Day! ✨</h2>
-""", unsafe_allow_html=True)
-
-# Display a fixed, humorous menu item
-st.markdown("""
-    <h3 style='color: white; margin: 0;'>Our special today is... The 'Mystery Meat Masala' (we're not entirely sure what's in it, but it's delicious)!</h3>
-    </div>
+        <h2 style='color: white; margin: 0;'>✨ Our special today is... The 'Mystery Meat Masala' (we're not entirely sure what's in it, but it's delicious ✨</h2>
 """, unsafe_allow_html=True)
 
 

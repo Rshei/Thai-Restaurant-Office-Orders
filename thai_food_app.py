@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime
+import pandas as pd
 
 # Page configuration
 st.set_page_config(page_title="Thai Food Order", page_icon="🍜", layout="wide")
@@ -29,27 +30,107 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# MENU DATABASE - Update this with actual menu items
+# MENU DATABASE - updated to match restaurant menu
 MENU = {
-    "1": {"name": "Pad Thai", "price": 9.50},
-    "2": {"name": "Green Curry", "price": 10.90},
-    "3": {"name": "Red Curry", "price": 10.90},
-    "4": {"name": "Tom Yum Soup", "price": 8.50},
-    "5": {"name": "Massaman Curry", "price": 11.50},
-    "6": {"name": "Pad See Ew", "price": 9.50},
-    "7": {"name": "Spring Rolls (4 pieces)", "price": 5.50},
-    "8": {"name": "Som Tam (Papaya Salad)", "price": 7.90},
-    "9": {"name": "Khao Pad (Fried Rice)", "price": 8.90},
-    "10": {"name": "Tom Kha Gai", "price": 8.90},
-    "11": {"name": "Panang Curry", "price": 10.90},
-    "12": {"name": "Pho Bo", "price": 9.90},
-    "13": {"name": "Satay Skewers (5 pieces)", "price": 7.50},
-    "14": {"name": "Drunken Noodles", "price": 9.90},
-    "15": {"name": "Thai Basil Chicken", "price": 10.50},
+    # Suppen u. Vorspeisen
+    "1":  {"name": "Eierblumensuppe (m. Hühnerfleisch)", "price": 3.00},
+    "3":  {"name": "Glasnudeln-Suppe (mit Hühnerfleisch)", "price": 3.00},
+    "5":  {"name": "Tom Kha-Gai Ram Suppe (m. Hühnerfleisch, Kokosmilch)", "price": 3.50},
+    "6":  {"name": "Tom Yam-Gung Thai-Suppe (m. Garnelen)", "price": 3.60},
+    "7":  {"name": "Sauer-Scharf-Suppe (m. Hühnerfleisch)", "price": 3.00},
+    "8":  {"name": "Wan-Tan-Suppe (m. Hühnerfleisch-Füllung)", "price": 3.00},
+    "18": {"name": "Frühlingsrollen vegetarisch (8 Stück)", "price": 3.00},
+    "19": {"name": "Wantan gebacken (6 Stück)", "price": 3.00},
+    "20": {"name": "Krupuk Garnelenchip", "price": 2.00},
+
+    # Gebratene Nudeln
+    "21": {"name": "Gebratene Nudeln m. Hühnerfleisch (klein)", "price": 5.00},
+    "23": {"name": "Gebratene Nudeln vegetarisch", "price": 5.00},
+    "24": {"name": "Gebratene Nudeln m. Hühnerfleisch (groß)", "price": 6.00},
+    "25": {"name": "Gebratene Nudeln m. Rindfleisch", "price": 8.00},
+    "26": {"name": "Gebratene Nudeln m. Ente paniert, kross u. Süß-Sauer-Sauce", "price": 9.00},
+    "27": {"name": "Gebratene Nudeln m. Hühnerbrust kross u. Süß-Sauer-Sauce", "price": 8.00},
+    "28": {"name": "Bami-Goreng (Hühner u. Shrimps, Curry, pikant)", "price": 7.50},
+    "29": {"name": "Gebratene Nudeln m. Garnelen (8 Stück)", "price": 9.00},
+
+    # Eierreis
+    "31": {"name": "Eierreis m. Hühnerfleisch (klein)", "price": 5.00},
+    "33": {"name": "Eierreis vegetarisch", "price": 5.00},
+    "34": {"name": "Eierreis m. Hühnerfleisch (groß)", "price": 6.00},
+    "35": {"name": "Eierreis m. Rindfleisch", "price": 8.00},
+    "36": {"name": "Eierreis m. Ente paniert, kross u. Süß-Sauer-Sauce", "price": 9.00},
+    "37": {"name": "Eierreis m. Hühnerbrust kross u. Süß-Sauer-Sauce", "price": 8.00},
+    "38": {"name": "Nasi-Goreng (Hühner u. Shrimps, Curry, pikant)", "price": 7.50},
+    "39": {"name": "Eierreis m. Garnelen (8 Stück)", "price": 9.00},
+
+    # Glasnudeln & Reisbandnudeln
+    "40": {"name": "Glasnudeln gebraten mit Gemüse und Tofu", "price": 6.50},
+    "41": {"name": "Glasnudeln gebraten mit Gemüse und Hühnerfleisch", "price": 7.50},
+    "42": {"name": "Glasnudeln gebraten mit Gemüse und Hühnerbrust doppelt gebacken", "price": 8.00},
+    "43": {"name": "Glasnudeln gebraten mit Gemüse und Rindfleisch", "price": 8.00},
+    "47": {"name": "Pad-Thai gebr. Reisbandnudeln m. Hühnerfleisch, Gemüse u. Erdnüsse (pikant)", "price": 7.50},
+
+    # Chop Suey-Sauce (mit Reis)
+    "50": {"name": "Chop Suey Vegetarisch mit Tofu", "price": 6.50},
+    "51a": {"name": "Chop Suey Hühnerfleisch", "price": 6.50},
+    "51b": {"name": "Chop Suey Hühnerbrust in Stück, doppelt gebacken", "price": 8.00},
+    "52": {"name": "Chop Suey Rindfleisch", "price": 8.00},
+    "53": {"name": "Chop Suey Ente paniert, kross gebacken", "price": 8.00},
+    "54": {"name": "Chop Suey Garnelen (8 Stück)", "price": 9.00},
+    "55": {"name": "Chop Suey Hühnerbrust in Scheiben, kross gebacken", "price": 9.00},
+
+    # Süß-Sauer-Sauce (mit Reis)
+    "56": {"name": "Süß-Sauer Tofu (pikant, nach Thai-Art)", "price": 6.50},
+    "57a": {"name": "Süß-Sauer Hühnerfleisch (pikant, nach Thai-Art)", "price": 8.00},
+    "57b": {"name": "Süß-Sauer Hühnerbrust in Stück, doppelt gebacken", "price": 8.00},
+    "57c": {"name": "Süß-Sauer Hühnerbrust in Scheibe, kross gebacken", "price": 9.00},
+    "58": {"name": "Süß-Sauer Garnelen (8 Stück), pikant, nach Thai-Art", "price": 9.00},
+    "59": {"name": "Süß-Sauer Ente paniert, kross gebacken", "price": 9.00},
+
+    # Rote Curry-Sauce (mit Reis)
+    "60": {"name": "Rotes Curry Vegetarisch mit Tofu", "price": 6.50},
+    "61": {"name": "Rotes Curry Hühnerfleisch", "price": 7.50},
+    "62": {"name": "Rotes Curry Rindfleisch", "price": 8.00},
+    "63": {"name": "Rotes Curry Ente paniert kross gebacken", "price": 9.00},
+    "64": {"name": "Rotes Curry Garnelen (8 Stück)", "price": 9.00},
+    "65": {"name": "Rotes Curry Hühnerbrust kross gebacken", "price": 8.00},
+
+    # Mango-Sauce (mit Reis)
+    "80": {"name": "Mango-Sauce Vegetarisch mit Tofu", "price": 6.50},
+    "81": {"name": "Mango-Sauce Hühnerfleisch", "price": 7.50},
+    "83": {"name": "Mango-Sauce Ente paniert kross gebacken", "price": 9.00},
+    "85": {"name": "Mango-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
+
+    # Knoblauch-Sauce (mit Reis)
+    "90": {"name": "Knoblauch-Sauce Vegetarisch mit Tofu", "price": 6.50},
+    "91": {"name": "Knoblauch-Sauce Hühnerfleisch", "price": 7.50},
+    "92": {"name": "Knoblauch-Sauce Rindfleisch", "price": 8.00},
+    "93": {"name": "Knoblauch-Sauce Ente paniert kross gebacken", "price": 9.00},
+    "95": {"name": "Knoblauch-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
+
+    # Ingwer-Sauce (mit Reis)
+    "100": {"name": "Ingwer-Sauce Vegetarisch mit Tofu", "price": 6.50},
+    "101": {"name": "Ingwer-Sauce Hühnerfleisch", "price": 7.50},
+    "102": {"name": "Ingwer-Sauce Rindfleisch", "price": 8.00},
+    "103": {"name": "Ingwer-Sauce Ente paniert kross gebacken", "price": 9.00},
+    "105": {"name": "Ingwer-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
+
+    # Zitronengras-Sauce (mit Reis)
+    "110": {"name": "Zitronengras-Sauce Vegetarisch mit Tofu", "price": 6.50},
+    "111": {"name": "Zitronengras-Sauce Hühnerfleisch", "price": 7.50},
+    "112": {"name": "Zitronengras-Sauce Rindfleisch", "price": 8.00},
+    "113": {"name": "Zitronengras-Sauce Ente paniert kross gebacken", "price": 9.00},
+    "115": {"name": "Zitronengras-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
+
+    # Erdnuss-Sauce (mit Reis)
+    "120": {"name": "Erdnuss-Sauce Vegetarisch mit Tofu", "price": 6.50},
+    "121": {"name": "Erdnuss-Sauce Hühnerfleisch", "price": 7.50},
+    "123": {"name": "Erdnuss-Sauce Ente paniert kross gebacken", "price": 9.00},
+    "124": {"name": "Erdnuss-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 }
 
 # Initialize session state for orders
-if 'orders' not in st.session_state:
+if "orders" not in st.session_state:
     st.session_state.orders = []
 
 # Fun header
@@ -68,100 +149,97 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# Display menu in a nice format
+# Quick Menu Reference
 with st.expander("📖 Quick Menu Reference", expanded=False):
     col_menu1, col_menu2, col_menu3 = st.columns(3)
-    menu_items = list(MENU.items())
-    
+    # sort by numeric key
+    menu_items = sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdigit, x[0])) or 0))
+
     for idx, (num, item) in enumerate(menu_items):
-        if idx % 3 == 0:
-            with col_menu1:
-                st.markdown(f"**{num}.** {item['name']} - €{item['price']:.2f}")
-        elif idx % 3 == 1:
-            with col_menu2:
-                st.markdown(f"**{num}.** {item['name']} - €{item['price']:.2f}")
-        else:
-            with col_menu3:
-                st.markdown(f"**{num}.** {item['name']} - €{item['price']:.2f}")
+        col = [col_menu1, col_menu2, col_menu3][idx % 3]
+        with col:
+            st.markdown(f"**{num}.** {item['name']} - €{item['price']:.2f}")
+
+# Build options for selectbox: "num - name (€price)"
+dish_options = []
+for key, value in sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdigit, x[0])) or 0)):
+    label = f"{key}. {value['name']} - €{value['price']:.2f}"
+    dish_options.append((label, key))
 
 # Main layout: Order form on left, Order summary on right
 col1, col2 = st.columns([2, 1])
 
 with col1:
     st.markdown("### 🎯 Place Your Order")
-    
-    # Order form
+
     with st.form("order_form", clear_on_submit=True):
         name = st.text_input("Your Name 👤", placeholder="Who's hungry?")
-        
-        menu_number = st.text_input("Menu Number 🔢", placeholder="Enter number from menu (e.g., 1, 2, 3...)")
-        
-        # Show dish name and price if valid menu number
-        if menu_number and menu_number in MENU:
-            dish_info = MENU[menu_number]
-            st.success(f"✨ {dish_info['name']} - €{dish_info['price']:.2f}")
-        elif menu_number:
-            st.warning("⚠️ Invalid menu number! Check the menu reference above.")
-        
+
+        # Select dish instead of free-text number
+        selected_label = st.selectbox(
+            "Choose your dish 🍽️",
+            options=[opt[0] for opt in dish_options],
+            index=0
+        )
+        # Map back to menu number
+        selected_key = next(k for (label, k) in dish_options if label == selected_label)
+        dish_info = MENU[selected_key]
+        st.info(f"✨ You chose: {selected_key}. {dish_info['name']} - €{dish_info['price']:.2f}")
+
         col_spice, col_extra = st.columns(2)
-        
+
         with col_spice:
             spice_level = st.select_slider(
                 "Heat Level 🌶️",
                 options=["😊 Mild", "🙂 Medium", "😅 Spicy", "🔥 Extra Hot", "☠️ Insane"],
                 value="🙂 Medium"
             )
-        
+
         with col_extra:
             extra_item = st.text_input("Extra Item? (optional)", placeholder="e.g., Rice, Drink")
             extra_price = st.number_input("Extra Price 💶", min_value=0.0, step=0.5, format="%.2f")
-        
+
         special_requests = st.text_area(
             "Special Requests 💬",
             placeholder="Extra veggies? No peanuts? Make it your own!",
             height=80
         )
-        
+
         submitted = st.form_submit_button("🚀 Add My Order!", use_container_width=True)
-        
+
         if submitted:
-            if name and menu_number and menu_number in MENU:
-                dish_info = MENU[menu_number]
-                total_price = dish_info['price'] + extra_price
-                
-                dish_display = dish_info['name']
+            if name:
+                total_price = dish_info["price"] + extra_price
+
+                dish_display = dish_info["name"]
                 if extra_item:
                     dish_display += f" + {extra_item}"
-                
+
                 order = {
                     "name": name,
-                    "dish": dish_display,
+                    "dish": f"{selected_key}. {dish_display}",
                     "spice": spice_level,
                     "requests": special_requests if special_requests else "No special requests",
                     "price": total_price,
-                    "time": datetime.now().strftime("%H:%M")
+                    "time": datetime.now().strftime("%H:%M"),
                 }
                 st.session_state.orders.append(order)
                 st.balloons()
                 st.success(f"✨ Awesome! Added {name}'s order!")
             else:
-                st.error("⚠️ Hold up! Fill in your name and a valid menu number!")
+                st.error("⚠️ Hold up! Please fill in your name!")
 
 with col2:
     st.markdown("### 📋 The Squad's Orders")
-    
+
     if st.session_state.orders:
-        # Create dataframe for table display
-        import pandas as pd
-        
         df = pd.DataFrame(st.session_state.orders)
-        df = df[['name', 'dish', 'spice', 'requests', 'price', 'time']]
-        df.columns = ['Name', 'Dish', 'Heat', 'Notes', '€', 'Time']
-        
+        df = df[["name", "dish", "spice", "requests", "price", "time"]]
+        df.columns = ["Name", "Dish", "Heat", "Notes", "€", "Time"]
+
         st.dataframe(df, use_container_width=True, hide_index=True)
-        
-        # Total calculation with fun styling
-        total = sum(order['price'] for order in st.session_state.orders)
+
+        total = sum(order["price"] for order in st.session_state.orders)
         st.markdown(f"""
             <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
             padding: 1rem; border-radius: 10px; text-align: center; margin: 1rem 0;'>
@@ -169,27 +247,24 @@ with col2:
                 <p style='color: white; margin: 0;'>💵 Cash to the delivery hero!</p>
             </div>
         """, unsafe_allow_html=True)
-        
-        # Remove order by selecting row number
+
         st.markdown("---")
         order_to_remove = st.number_input(
-            "Remove order (row #)", 
-            min_value=0, 
-            max_value=len(st.session_state.orders)-1, 
-            step=1
+            "Remove order (row #, starting at 0)",
+            min_value=0,
+            max_value=len(st.session_state.orders) - 1,
+            step=1,
         )
         if st.button("🗑️ Remove Order"):
             st.session_state.orders.pop(order_to_remove)
-            st.rerun()
-        
-        # Clear all orders button
+            st.experimental_rerun()
+
         if st.button("💣 Clear Everything", use_container_width=True):
             st.session_state.orders = []
-            st.rerun()
-            
-        # Export orders as text
+            st.experimental_rerun()
+
         if st.button("📋 Copy Order List", use_container_width=True):
-            summary = "🍜 THAI FOOD SQUAD ORDERS 🍜\n" + "="*35 + "\n\n"
+            summary = "🍜 THAI FOOD SQUAD ORDERS 🍜\n" + "=" * 35 + "\n\n"
             for idx, order in enumerate(st.session_state.orders, 1):
                 summary += f"{idx}. {order['name']}\n"
                 summary += f"   🍽️ {order['dish']}\n"
@@ -198,7 +273,7 @@ with col2:
                 summary += f"   💶 €{order['price']:.2f}\n\n"
             summary += f"💰 TOTAL: €{total:.2f}\n"
             summary += "💵 Payment: CASH to delivery hero"
-            
+
             st.code(summary, language=None)
     else:
         st.markdown("""
@@ -211,4 +286,7 @@ with col2:
 
 # Footer
 st.markdown("---")
-st.markdown("<p style='text-align: center; color: #666;'>🚶 Your friendly office delivery service | 💶 Cash only vibes</p>", unsafe_allow_html=True)
+st.markdown(
+    "<p style='text-align: center; color: #666;'>🚶 Your friendly office delivery service | 💶 Cash only vibes</p>",
+    unsafe_allow_html=True,
+)

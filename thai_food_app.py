@@ -79,7 +79,7 @@ MENU = {
     "54": {"name": "Chop Suey Garnelen (8 Stück)", "price": 9.00},
     "55": {"name": "Chop Suey Hühnerbrust in Scheiben, kross gebacken", "price": 9.00},
 
-    # Süß-Sauer-Sauce (mit Reis)
+    # Süß-Sauer-Sauce (with Reis)
     "56": {"name": "Süß-Sauer Tofu (pikant, nach Thai-Art)", "price": 6.50},
     "57a": {"name": "Süß-Sauer Hühnerfleisch (pikant, nach Thai-Art)", "price": 8.00},
     "57b": {"name": "Süß-Sauer Hühnerbrust in Stück, doppelt gebacken", "price": 8.00},
@@ -137,11 +137,18 @@ if "orders" not in st.session_state:
 st.markdown("<h1 style='text-align: center; color: #ff6b6b;'>🍜 Thai Lunch Squad 🔥</h1>", unsafe_allow_html=True)
 st.markdown("<h3 style='text-align: center; color: #666;'>Thien Thai Bistro - Let's get this pad thai!</h3>", unsafe_allow_html=True)
 
+st.markdown("""
+    <div style='text-align: center; padding: 1rem; background-color: #e6f7ff; border-radius: 10px; margin-bottom: 2rem;'>
+        <h4 style='color: #007bff;'>Your Office Food Delivery Just Got Easier!</h4>
+        <p style='color: #333;'>Simply choose your favorites from our delicious menu, place your order, and relax! We'll deliver fresh, hot food right to your office. Remember: cash payments only, and please show some love to our delivery heroes with a tip! 🛵💰</p>
+    </div>
+""", unsafe_allow_html=True)
+
 # Menu link section
 MENU_URL = "https://www.google.com/maps/place/Thien+Thai+Bistro/@52.5364437,13.2723721,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDZruezGQ!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAG0ilSyjaUPfX_bg9cANspvtJgqf6qGUB3hTyNN8bkwRMCiCzpOZQn7hvozHQvIqqUefUHo5ywJ6ZYweysXOCSP05KNw_VqQlybBnJJgbh2Dn-3jtWL6ERtiGrE_n_geRKhC-eDcqPV7%3Dw146-h195-k-no!7i3000!8i4000!4m10!1m2!2m1!1ssiemens+damm!3m6!1s0x47a856c7885ec39d:0xe8d8c1bdc6419318!8m2!3d52.5362941!4d13.272357!10e9!16s%2Fg%2F11bxc5hddn?entry=ttu&g_ep=EgoyMDI1MTIwMi4wIKXMDSoASAFQAw%3D%3D"
 
 st.markdown(f"""
-    <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+    <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 15px; margin-bottom: 2rem;'>
         <a href='{MENU_URL}' target='_blank' style='color: white; text-decoration: none; font-size: 1.2rem; font-weight: bold;'>
             📱 Check Out The Menu 🌶️
@@ -208,7 +215,6 @@ with col1:
                     "time": datetime.now().strftime("%H:%M"),
                 }
                 st.session_state.orders.append(order)
-                st.balloons()
                 st.success(f"✨ Awesome! Added {name}'s order!")
             else:
                 st.error("⚠️ Hold up! Please fill in your name!")
@@ -225,7 +231,7 @@ with col2:
 
         total = sum(order["price"] for order in st.session_state.orders)
         st.markdown(f"""
-            <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
+            <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             padding: 1rem; border-radius: 10px; text-align: center; margin: 1rem 0;'>
                 <h2 style='color: white; margin: 0;'>Total: €{total:.2f}</h2>
                 <p style='color: white; margin: 0;'>💵 Cash to the delivery hero!</p>
@@ -260,7 +266,7 @@ with col2:
             st.code(summary, language=None)
     else:
         st.markdown("""
-            <div style='text-align: center; padding: 2rem; background-color: #fff3cd; 
+            <div style='text-align: center; padding: 2rem; background-color: #fff3cd;
             border-radius: 10px; border: 2px dashed #ffc107;'>
                 <h3>🤔 No orders yet!</h3>
                 <p>Be the first one to order! 🚀</p>

@@ -1,7 +1,7 @@
+
 import streamlit as st
 from datetime import datetime
 import pandas as pd
-import random
 
 # Page configuration
 st.set_page_config(page_title="Thai Food Order", page_icon="🍜", layout="wide")
@@ -78,7 +78,7 @@ MENU = {
     "52": {"name": "Chop Suey Rindfleisch", "price": 8.00},
     "53": {"name": "Chop Suey Ente paniert, kross gebacken", "price": 8.00},
     "54": {"name": "Chop Suey Garnelen (8 Stück)", "price": 9.00},
-    "55": {"name": "Chop Suey Hühnerbrust in Scheiben, kross gebacken", "price": 9.00},
+    "55": {"name": "Chop Suey Hühnerbrust in Scheiben, kross gebacken", "price": 8.00},
 
     # Süß-Sauer-Sauce (with Reis)
     "56": {"name": "Süß-Sauer Tofu (pikant, nach Thai-Art)", "price": 6.50},
@@ -88,7 +88,7 @@ MENU = {
     "58": {"name": "Süß-Sauer Garnelen (8 Stück), pikant, nach Thai-Art", "price": 9.00},
     "59": {"name": "Süß-Sauer Ente paniert, kross gebacken", "price": 9.00},
 
-    # Rote Curry-Sauce (with Reis)
+    # Rote Curry-Sauce (mit Reis)
     "60": {"name": "Rotes Curry Vegetarisch mit Tofu", "price": 6.50},
     "61": {"name": "Rotes Curry Hühnerfleisch", "price": 7.50},
     "62": {"name": "Rotes Curry Rindfleisch", "price": 8.00},
@@ -96,63 +96,39 @@ MENU = {
     "64": {"name": "Rotes Curry Garnelen (8 Stück)", "price": 9.00},
     "65": {"name": "Rotes Curry Hühnerbrust kross gebacken", "price": 8.00},
 
-    # Mango-Sauce (with Reis)
+    # Mango-Sauce (mit Reis)
     "80": {"name": "Mango-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "81": {"name": "Mango-Sauce Hühnerfleisch", "price": 7.50},
     "83": {"name": "Mango-Sauce Ente paniert kross gebacken", "price": 9.00},
     "85": {"name": "Mango-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 
-    # Knoblauch-Sauce (with Reis)
+    # Knoblauch-Sauce (mit Reis)
     "90": {"name": "Knoblauch-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "91": {"name": "Knoblauch-Sauce Hühnerfleisch", "price": 7.50},
     "92": {"name": "Knoblauch-Sauce Rindfleisch", "price": 8.00},
     "93": {"name": "Knoblauch-Sauce Ente paniert kross gebacken", "price": 9.00},
     "95": {"name": "Knoblauch-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 
-    # Ingwer-Sauce (with Reis)
+    # Ingwer-Sauce (mit Reis)
     "100": {"name": "Ingwer-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "101": {"name": "Ingwer-Sauce Hühnerfleisch", "price": 7.50},
     "102": {"name": "Ingwer-Sauce Rindfleisch", "price": 8.00},
     "103": {"name": "Ingwer-Sauce Ente paniert kross gebacken", "price": 9.00},
     "105": {"name": "Ingwer-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 
-    # Zitronengras-Sauce (with Reis)
+    # Zitronengras-Sauce (mit Reis)
     "110": {"name": "Zitronengras-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "111": {"name": "Zitronengras-Sauce Hühnerfleisch", "price": 7.50},
     "112": {"name": "Zitronengras-Sauce Rindfleisch", "price": 8.00},
     "113": {"name": "Zitronengras-Sauce Ente paniert kross gebacken", "price": 9.00},
     "115": {"name": "Zitronengras-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 
-    # Erdnuss-Sauce (with Reis)
+    # Erdnuss-Sauce (mit Reis)
     "120": {"name": "Erdnuss-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "121": {"name": "Erdnuss-Sauce Hühnerfleisch", "price": 7.50},
     "123": {"name": "Erdnuss-Sauce Ente paniert kross gebacken", "price": 9.00},
     "124": {"name": "Erdnuss-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 }
-
-# Customer Reviews data
-CUSTOMER_REVIEWS = [
-    {
-        "customer_name": "Alice S.",
-        "rating": 5,
-        "review_text": "Absolutely loved the Pad Thai! So authentic and delicious. Will definitely order again!"
-    },
-    {
-        "customer_name": "Bob T.",
-        "rating": 4,
-        "review_text": "Good service and quick delivery. The Red Curry with chicken was tasty, but a bit spicier than expected."
-    },
-    {
-        "customer_name": "Charlie M.",
-        "rating": 3,
-        "review_text": "The Spring Rolls were great, but the noodle dish was a bit bland for my taste. Overall, decent."
-    },
-    {
-        "customer_name": "Dana L.",
-        "rating": 5,
-        "review_text": "Fantastic Mango-Sauce Duck! The meat was crispy and the sauce was perfectly balanced."
-    }
-]
 
 # Initialize session state for orders
 if "orders" not in st.session_state:
@@ -170,7 +146,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Menu link section
-MENU_URL = "https://www.google.com/maps/place/Thien+Thai+Bistro/@52.5364437,13.2723721,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDZruezGQ!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAG0ilSyjaUPfX_bg9cANspvtJgqf6qGUB3hTyNN8bkwRMCiCzpOZQn7hvozHQvIqqUefUHo5ywJ6ZYweysXOCSP05KNw_VqQlybBnJJgbh2Dn-3jtWL6ERtiGrE_n_geRKhC-eDcqPV7%3Dw146-h195-k-no!7i3000!8i4000!4m10!1m2!1ssiemens+damm!3m6!1s0x47a856c7885ec39d:0xe8d8c1bdc6419318!8m2!3d52.5362941!4d13.272357!10e9!16s%2Fg%2F11bxc5hddn?entry=ttu&g_ep=EgoyMDI1MTIwMi4wIKXMDSoASAFQAw%3D%3D"
+MENU_URL = "https://www.google.com/maps/place/Thien+Thai+Bistro/@52.5364437,13.2723721,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDZruezGQ!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAG0ilSyjaUPfX_bg9cANspvtJgqf6qGUB3hTyNN8bkwRMCiCzpOZQn7hvozHQvIqqUefUHo5ywJ6ZYweysXOCSP05KNw_VqQlybBnJJgbh2Dn-3jtWL6ERtiGrE_n_geRKhC-eDcqPV7%3Dw146-h195-k-no!7i3000!8i4000!4m10!1m2!2m1!1ssiemens+damm!3m6!1s0x47a856c7885ec39d:0xe8d8c1bdc6419318!8m2!3d52.5362941!4d13.272357!10e9!16s%2Fg%2F11bxc5hddn?entry=ttu&g_ep=EgoyMDI1MTIwMi4wIKXMDSoASAFQAw%3D%3D"
 
 st.markdown(f"""
     <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -180,26 +156,6 @@ st.markdown(f"""
         </a>
     </div>
 """, unsafe_allow_html=True)
-
-# Special of the Day
-st.markdown("""
-    <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #f7b733 0%, #fc4a1a 100%);
-    border-radius: 10px; margin-bottom: 2rem;'>
-        <h2 style='color: white; margin: 0;'>✨ Special of the Day! ✨</h2>
-""", unsafe_allow_html=True)
-
-# Randomly select a menu item for 'Special of the Day'
-if MENU:
-    special_key = random.choice(list(MENU.keys()))
-    special_item = MENU[special_key]
-    st.markdown(f"""
-        <h3 style='color: white; margin: 0;'>{special_item['name']}</h3>
-        <h4 style='color: white; margin: 0;'>Only €{special_item['price']:.2f}!</h4>
-        </div>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("<p style='color: white;'>No specials available today.</p></div>", unsafe_allow_html=True)
-
 
 # Quick Menu Reference
 with st.expander("📖 Quick Menu Reference", expanded=False):
@@ -283,7 +239,7 @@ with col2:
             </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("--- ")
+        st.markdown("---")
         order_to_remove = st.number_input(
             "Remove order (row #, starting at 0)",
             min_value=0,
@@ -318,17 +274,9 @@ with col2:
             </div>
         """, unsafe_allow_html=True)
 
-# Customer Reviews Section
-st.markdown("--- ✨ What Our Customers Say! ✨ ---")
-
-for review in CUSTOMER_REVIEWS:
-    st.markdown(f"**{review['customer_name']}** - {'⭐' * review['rating']}")
-    st.info(f"_{review['review_text']}_")
-    st.markdown("\n") # Add some spacing between reviews
-
 # Footer
-st.markdown("--- ")
+st.markdown("---")
 st.markdown(
-    "<p style='text-align: center; color: #666;'>🚶 Your friendly office delivery service | 💶 Cash only vibes</p>",
+    "<p style='text-align: center; color: #666;'>🚶This app built by Your friendly office delivery service | 💶 Cash only vibes</p>",
     unsafe_allow_html=True,
 )

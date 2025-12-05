@@ -13,7 +13,9 @@ st.title("🍜 Thai Restaurant Office Orders")
 st.markdown("### Order your lunch from our neighbor Thai restaurant!")
 
 # Menu link section
-st.info("📋 **Restaurant Menu**: [Click here to view the menu](https://www.google.com/maps/place/Thien+Thai+Bistro/@52.5364437,13.2723721,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDZruezGQ!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAG0ilSyjaUPfX_bg9cANspvtJgqf6qGUB3hTyNN8bkwRMCiCzpOZQn7hvozHQvIqqUefUHo5ywJ6ZYweysXOCSP05KNw_VqQlybBnJJgbh2Dn-3jtWL6ERtiGrE_n_geRKhC-eDcqPV7%3Dw146-h195-k-no!7i3000!8i4000!4m10!1m2!2m1!1ssiemens+damm!3m6!1s0x47a856c7885ec39d:0xe8d8c1bdc6419318!8m2!3d52.5362941!4d13.272357!10e9!16s%2Fg%2F11bxc5hddn?entry=ttu&g_ep=EgoyMDI1MTIwMi4wIKXMDSoASAFQAw%3D%3D) - Replace this link with your actual menu URL")
+MENU_URL = "https://www.google.com/maps/place/Thien+Thai+Bistro/@52.5364437,13.2723721,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDZruezGQ!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAG0ilSyjaUPfX_bg9cANspvtJgqf6qGUB3hTyNN8bkwRMCiCzpOZQn7hvozHQvIqqUefUHo5ywJ6ZYweysXOCSP05KNw_VqQlybBnJJgbh2Dn-3jtWL6ERtiGrE_n_geRKhC-eDcqPV7%3Dw146-h195-k-no!7i3000!8i4000!4m10!1m2!2m1!1ssiemens+damm!3m6!1s0x47a856c7885ec39d:0xe8d8c1bdc6419318!8m2!3d52.5362941!4d13.272357!10e9!16s%2Fg%2F11bxc5hddn?entry=ttu&g_ep=EgoyMDI1MTIwMi4wIKXMDSoASAFQAw%3D%3D"
+
+st.info(f"📋 **Restaurant Menu**: [Click here to view Thien Thai Bistro menu]({MENU_URL})")
 
 # Main layout: Order form on left, Order summary on right
 col1, col2 = st.columns([2, 1])
@@ -61,21 +63,26 @@ with col2:
     st.subheader("📝 Today's Orders")
     
     if st.session_state.orders:
-        # Display all orders
-        for idx, order in enumerate(st.session_state.orders):
-            with st.container():
-                st.markdown(f"**{order['name']}**")
-                st.text(f"🍽️ {order['dish']}")
-                st.text(f"🌶️ {order['spice']}")
-                if order['requests']:
-                    st.text(f"📝 {order['requests']}")
-                st.text(f"💶 €{order['price']:.2f} | ⏰ {order['time']}")
-                
-                if st.button("Remove", key=f"remove_{idx}"):
-                    st.session_state.orders.pop(idx)
-                    st.rerun()
-                
-                st.divider()
+        # Create dataframe for table display
+        import pandas as pd
+        
+        df = pd.DataFrame(st.session_state.orders)
+        df = df[['name', 'dish', 'spice', 'requests', 'price', 'time']]
+        df.columns = ['Name', 'Dish', 'Spice', 'Special Requests', 'Price (€)', 'Time']
+        
+        st.dataframe(df, use_container_width=True, hide_index=True)
+        
+        # Remove order by selecting row number
+        st.markdown("---")
+        order_to_remove = st.number_input(
+            "Remove order by row number (starting from 0)", 
+            min_value=0, 
+            max_value=len(st.session_state.orders)-1, 
+            step=1
+        )
+        if st.button("🗑️ Remove Selected Order"):
+            st.session_state.orders.pop(order_to_remove)
+            st.rerun()
         
         # Total calculation
         total = sum(order['price'] for order in st.session_state.orders)

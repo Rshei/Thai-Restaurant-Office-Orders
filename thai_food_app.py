@@ -29,6 +29,25 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# MENU DATABASE - Update this with actual menu items
+MENU = {
+    "1": {"name": "Pad Thai", "price": 9.50},
+    "2": {"name": "Green Curry", "price": 10.90},
+    "3": {"name": "Red Curry", "price": 10.90},
+    "4": {"name": "Tom Yum Soup", "price": 8.50},
+    "5": {"name": "Massaman Curry", "price": 11.50},
+    "6": {"name": "Pad See Ew", "price": 9.50},
+    "7": {"name": "Spring Rolls (4 pieces)", "price": 5.50},
+    "8": {"name": "Som Tam (Papaya Salad)", "price": 7.90},
+    "9": {"name": "Khao Pad (Fried Rice)", "price": 8.90},
+    "10": {"name": "Tom Kha Gai", "price": 8.90},
+    "11": {"name": "Panang Curry", "price": 10.90},
+    "12": {"name": "Pho Bo", "price": 9.90},
+    "13": {"name": "Satay Skewers (5 pieces)", "price": 7.50},
+    "14": {"name": "Drunken Noodles", "price": 9.90},
+    "15": {"name": "Thai Basil Chicken", "price": 10.50},
+}
+
 # Initialize session state for orders
 if 'orders' not in st.session_state:
     st.session_state.orders = []
@@ -49,6 +68,22 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
+# Display menu in a nice format
+with st.expander("📖 Quick Menu Reference", expanded=False):
+    col_menu1, col_menu2, col_menu3 = st.columns(3)
+    menu_items = list(MENU.items())
+    
+    for idx, (num, item) in enumerate(menu_items):
+        if idx % 3 == 0:
+            with col_menu1:
+                st.markdown(f"**{num}.** {item['name']} - €{item['price']:.2f}")
+        elif idx % 3 == 1:
+            with col_menu2:
+                st.markdown(f"**{num}.** {item['name']} - €{item['price']:.2f}")
+        else:
+            with col_menu3:
+                st.markdown(f"**{num}.** {item['name']} - €{item['price']:.2f}")
+
 # Main layout: Order form on left, Order summary on right
 col1, col2 = st.columns([2, 1])
 
@@ -59,9 +94,16 @@ with col1:
     with st.form("order_form", clear_on_submit=True):
         name = st.text_input("Your Name 👤", placeholder="Who's hungry?")
         
-        dish = st.text_input("What Are You Craving? 🍽️", placeholder="Pad Thai, Green Curry, Tom Yum...")
+        menu_number = st.text_input("Menu Number 🔢", placeholder="Enter number from menu (e.g., 1, 2, 3...)")
         
-        col_spice, col_price = st.columns(2)
+        # Show dish name and price if valid menu number
+        if menu_number and menu_number in MENU:
+            dish_info = MENU[menu_number]
+            st.success(f"✨ {dish_info['name']} - €{dish_info['price']:.2f}")
+        elif menu_number:
+            st.warning("⚠️ Invalid menu number! Check the menu reference above.")
+        
+        col_spice, col_extra = st.columns(2)
         
         with col_spice:
             spice_level = st.select_slider(
@@ -70,8 +112,9 @@ with col1:
                 value="🙂 Medium"
             )
         
-        with col_price:
-            price = st.number_input("Price 💶", min_value=0.0, step=0.5, format="%.2f")
+        with col_extra:
+            extra_item = st.text_input("Extra Item? (optional)", placeholder="e.g., Rice, Drink")
+            extra_price = st.number_input("Extra Price 💶", min_value=0.0, step=0.5, format="%.2f")
         
         special_requests = st.text_area(
             "Special Requests 💬",
@@ -82,20 +125,27 @@ with col1:
         submitted = st.form_submit_button("🚀 Add My Order!", use_container_width=True)
         
         if submitted:
-            if name and dish and price > 0:
+            if name and menu_number and menu_number in MENU:
+                dish_info = MENU[menu_number]
+                total_price = dish_info['price'] + extra_price
+                
+                dish_display = dish_info['name']
+                if extra_item:
+                    dish_display += f" + {extra_item}"
+                
                 order = {
                     "name": name,
-                    "dish": dish,
+                    "dish": dish_display,
                     "spice": spice_level,
                     "requests": special_requests if special_requests else "No special requests",
-                    "price": price,
+                    "price": total_price,
                     "time": datetime.now().strftime("%H:%M")
                 }
                 st.session_state.orders.append(order)
                 st.balloons()
                 st.success(f"✨ Awesome! Added {name}'s order!")
             else:
-                st.error("⚠️ Hold up! Fill in your name, dish, and price!")
+                st.error("⚠️ Hold up! Fill in your name and a valid menu number!")
 
 with col2:
     st.markdown("### 📋 The Squad's Orders")

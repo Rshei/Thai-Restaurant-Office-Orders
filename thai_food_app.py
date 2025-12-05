@@ -149,9 +149,6 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# Quick Menu Reference
-with st.expander("📖 Quick Menu Reference", expanded=False):
-    col_menu1, col_menu2, col_menu3 = st.columns(3)
     # sort by numeric key
     menu_items = sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdigit, x[0])) or 0))
 

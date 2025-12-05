@@ -186,19 +186,6 @@ with col1:
         dish_info = MENU[selected_key]
         st.info(f"✨ You chose: {selected_key}. {dish_info['name']} - €{dish_info['price']:.2f}")
 
-        col_spice, col_extra = st.columns(2)
-
-        with col_spice:
-            spice_level = st.select_slider(
-                "Heat Level 🌶️",
-                options=["😊 Mild", "🙂 Medium", "😅 Spicy", "🔥 Extra Hot", "☠️ Insane"],
-                value="🙂 Medium"
-            )
-
-        with col_extra:
-            extra_item = st.text_input("Extra Item? (optional)", placeholder="e.g., Rice, Drink")
-            extra_price = st.number_input("Extra Price 💶", min_value=0.0, step=0.5, format="%.2f")
-
         special_requests = st.text_area(
             "Special Requests 💬",
             placeholder="Extra veggies? No peanuts? Make it your own!",
@@ -209,16 +196,13 @@ with col1:
 
         if submitted:
             if name:
-                total_price = dish_info["price"] + extra_price
+                total_price = dish_info["price"]
 
                 dish_display = dish_info["name"]
-                if extra_item:
-                    dish_display += f" + {extra_item}"
 
                 order = {
                     "name": name,
                     "dish": f"{selected_key}. {dish_display}",
-                    "spice": spice_level,
                     "requests": special_requests if special_requests else "No special requests",
                     "price": total_price,
                     "time": datetime.now().strftime("%H:%M"),
@@ -234,8 +218,8 @@ with col2:
 
     if st.session_state.orders:
         df = pd.DataFrame(st.session_state.orders)
-        df = df[["name", "dish", "spice", "requests", "price", "time"]]
-        df.columns = ["Name", "Dish", "Heat", "Notes", "€", "Time"]
+        df = df[["name", "dish", "requests", "price", "time"]]
+        df.columns = ["Name", "Dish", "Notes", "€", "Time"]
 
         st.dataframe(df, use_container_width=True, hide_index=True)
 
@@ -257,18 +241,17 @@ with col2:
         )
         if st.button("🗑️ Remove Order"):
             st.session_state.orders.pop(order_to_remove)
-            st.experimental_rerun()
+            st.rerun()
 
         if st.button("💣 Clear Everything", use_container_width=True):
             st.session_state.orders = []
-            st.experimental_rerun()
+            st.rerun()
 
         if st.button("📋 Copy Order List", use_container_width=True):
             summary = "🍜 THAI FOOD SQUAD ORDERS 🍜\n" + "=" * 35 + "\n\n"
             for idx, order in enumerate(st.session_state.orders, 1):
                 summary += f"{idx}. {order['name']}\n"
                 summary += f"   🍽️ {order['dish']}\n"
-                summary += f"   🌶️ {order['spice']}\n"
                 summary += f"   💬 {order['requests']}\n"
                 summary += f"   💶 €{order['price']:.2f}\n\n"
             summary += f"💰 TOTAL: €{total:.2f}\n"

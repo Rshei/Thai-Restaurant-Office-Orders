@@ -182,23 +182,18 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # Special of the Day
+# Special of the Day
 st.markdown("""
     <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #f7b733 0%, #fc4a1a 100%);
     border-radius: 10px; margin-bottom: 2rem;'>
         <h2 style='color: white; margin: 0;'>✨ Special of the Day! ✨</h2>
 """, unsafe_allow_html=True)
 
-# Randomly select a menu item for 'Special of the Day'
-if MENU:
-    special_key = random.choice(list(MENU.keys()))
-    special_item = MENU[special_key]
-    st.markdown(f"""
-        <h3 style='color: white; margin: 0;'>{special_item['name']}</h3>
-        <h4 style='color: white; margin: 0;'>Only €{special_item['price']:.2f}!</h4>
-        </div>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown("<p style='color: white;'>No specials available today.</p></div>", unsafe_allow_html=True)
+# Display a fixed, humorous menu item
+st.markdown("""
+    <h3 style='color: white; margin: 0;'>Our special today is... The 'Mystery Meat Masala' (we're not entirely sure what's in it, but it's delicious)!</h3>
+    </div>
+""", unsafe_allow_html=True)
 
 
 # Quick Menu Reference

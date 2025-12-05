@@ -149,13 +149,13 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-    # sort by numeric key
-    menu_items = sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdigit, x[0])) or 0))
+# sort by numeric key
+menu_items = sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdigit, x[0])) or 0))
 
-    for idx, (num, item) in enumerate(menu_items):
-        col = [col_menu1, col_menu2, col_menu3][idx % 3]
-        with col:
-            st.markdown(f"**{num}.** {item['name']} - €{item['price']:.2f}")
+for idx, (num, item) in enumerate(menu_items):
+    col = [col_menu1, col_menu2, col_menu3][idx % 3]
+    with col:
+        st.markdown(f"**{num}.** {item['name']} - €{item['price']:.2f}")
 
 # Build options for selectbox: "num - name (€price)"
 dish_options = []

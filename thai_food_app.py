@@ -77,7 +77,7 @@ MENU = {
     "52": {"name": "Chop Suey Rindfleisch", "price": 8.00},
     "53": {"name": "Chop Suey Ente paniert, kross gebacken", "price": 8.00},
     "54": {"name": "Chop Suey Garnelen (8 Stück)", "price": 9.00},
-    "55": {"name": "Chop Suey Hühnerbrust in Scheiben, kross gebacken", "price": 9.00},
+    "55": {"name": "Chop Suey Hühnerbrust in Scheiben, kross gebacken", "price": 8.00},
 
     # Süß-Sauer-Sauce (with Reis)
     "56": {"name": "Süß-Sauer Tofu (pikant, nach Thai-Art)", "price": 6.50},

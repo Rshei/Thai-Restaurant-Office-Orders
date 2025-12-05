@@ -48,7 +48,6 @@ MENU_CATEGORIES = {
 
 MENU = {
     # Suppen u. Vorspeisen
-    " ",
     "1":  {"name": "Eierblumensuppe (m. Hühnerfleisch)", "price": 3.00},
     "3":  {"name": "Glasnudeln-Suppe (mit Hühnerfleisch)", "price": 3.00},
     "5":  {"name": "Tom Kha-Gai Ram Suppe (m. Hühnerfleisch, Kokosmilch)", "price": 3.50},
@@ -213,7 +212,7 @@ with col1:
         # Map back to menu number
         selected_key = next(k for (label, k) in dish_options if label == selected_label)
         dish_info = MENU[selected_key]
-       
+    st.info(f"✨ You chose: {selected_key}. {dish_info['name']} - €{dish_info['price']:.2f}")
 
         special_requests = st.text_area(
             "Special Requests 💬",

@@ -161,13 +161,11 @@ with st.expander("📖 Quick Menu Reference", expanded=False):
             st.markdown(f"**{num}.** {item['name']} - €{item['price']:.2f}")
 
 # Build options for selectbox: "num - name (€price)"
-dish_options = []
-for key, value in sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdigit, x[0])) or 0)):
-    label = f"{key}. {value['name']} - €{value['price']:.2f}"
-    dish_options.append((label, key))
+dish_options = {key: f"{key}. {value['name']} - €{value['price']:.2f}" for key, value in MENU.items()}
+sorted_options = dict(sorted(dish_options.items(), key=lambda x: int(''.join(filter(str.isdigit, x[0])) or 0)))
 
-# Main layout: Order form on left, Order summary on right
-col1, col2 = st.columns([2, 1])
+# Main layout: Order form on left (1/3), Order summary on right (2/3)
+col1, col2 = st.columns([1, 2])
 
 with col1:
     st.markdown("### 🎯 Place Your Order")
@@ -176,15 +174,13 @@ with col1:
         name = st.text_input("Your Name 👤", placeholder="Who's hungry?")
 
         # Select dish instead of free-text number
-        selected_label = st.selectbox(
+        selected_key = st.selectbox(
             "Choose your dish 🍽️",
-            options=[opt[0] for opt in dish_options],
-            index=0
+            options=list(sorted_options.keys()),
+            format_func=lambda key: sorted_options[key]
         )
-        # Map back to menu number
-        selected_key = next(k for (label, k) in dish_options if label == selected_label)
         dish_info = MENU[selected_key]
-        st.info(f"✨ You chose: {selected_key}. {dish_info['name']} - €{dish_info['price']:.2f}")
+        st.info(f"✨ You chose: **{selected_key}. {dish_info['name']}** - €{dish_info['price']:.2f}")
 
         special_requests = st.text_area(
             "Special Requests 💬",

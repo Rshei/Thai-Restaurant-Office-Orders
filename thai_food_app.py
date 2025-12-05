@@ -276,6 +276,6 @@ with col2:
 # Footer
 st.markdown("---")
 st.markdown(
-    "<p style='text-align: center; color: #666;'>🚶 Your friendly office delivery service | 💶 Cash only vibes</p>",
+    "<p style='text-align: center; color: #666;'>🚶This app built by Your friendly office delivery service | 💶 Cash only vibes</p>",
     unsafe_allow_html=True,
 )

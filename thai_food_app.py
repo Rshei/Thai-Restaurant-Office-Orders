@@ -30,7 +30,22 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# MENU DATABASE - updated to match restaurant menu
+# MENU DATABASE with categories
+MENU_CATEGORIES = {
+    "Suppen & Vorspeisen": ["1", "3", "5", "6", "7", "8", "18", "19", "20"],
+    "Gebratene Nudeln": ["21", "23", "24", "25", "26", "27", "28", "29"],
+    "Eierreis": ["31", "33", "34", "35", "36", "37", "38", "39"],
+    "Glasnudeln & Reisbandnudeln": ["40", "41", "42", "43", "47"],
+    "Chop Suey-Sauce": ["50", "51a", "51b", "52", "53", "54", "55"],
+    "Süß-Sauer-Sauce": ["56", "57a", "57b", "57c", "58", "59"],
+    "Rote Curry-Sauce": ["60", "61", "62", "63", "64", "65"],
+    "Mango-Sauce": ["80", "81", "83", "85"],
+    "Knoblauch-Sauce": ["90", "91", "92", "93", "95"],
+    "Ingwer-Sauce": ["100", "101", "102", "103", "105"],
+    "Zitronengras-Sauce": ["110", "111", "112", "113", "115"],
+    "Erdnuss-Sauce": ["120", "121", "123", "124"],
+}
+
 MENU = {
     # Suppen u. Vorspeisen
     "1":  {"name": "Eierblumensuppe (m. Hühnerfleisch)", "price": 3.00},
@@ -129,6 +144,15 @@ MENU = {
     "124": {"name": "Erdnuss-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 }
 
+def sort_menu_key(key):
+    """Properly sort menu keys including those with letters (51a, 51b, etc.)"""
+    # Extract numeric part
+    num_part = ''.join(filter(str.isdigit, key))
+    # Extract letter part
+    letter_part = ''.join(filter(str.isalpha, key))
+    # Return tuple for proper sorting
+    return (int(num_part) if num_part else 0, letter_part)
+
 # Initialize session state for orders
 if "orders" not in st.session_state:
     st.session_state.orders = []
@@ -149,20 +173,24 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# Quick Menu Reference
+# Quick Menu Reference - organized by category
 with st.expander("📖 Quick Menu Reference", expanded=False):
-    col_menu1, col_menu2, col_menu3 = st.columns(3)
-    # sort by numeric key
-    menu_items = sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdigit, x[0])) or 0))
-
-    for idx, (num, item) in enumerate(menu_items):
-        col = [col_menu1, col_menu2, col_menu3][idx % 3]
-        with col:
-            st.markdown(f"**{num}.** {item['name']} - €{item['price']:.2f}")
+    for category, item_keys in MENU_CATEGORIES.items():
+        st.markdown(f"**{category}**")
+        cols = st.columns(2)
+        for idx, key in enumerate(item_keys):
+            if key in MENU:
+                item = MENU[key]
+                col = cols[idx % 2]
+                with col:
+                    st.markdown(f"**{key}.** {item['name']} - €{item['price']:.2f}")
+        st.markdown("---")
 
 # Build options for selectbox: "num - name (€price)"
 dish_options = []
-for key, value in sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdigit, x[0])) or 0)):
+sorted_keys = sorted(MENU.keys(), key=sort_menu_key)
+for key in sorted_keys:
+    value = MENU[key]
     label = f"{key}. {value['name']} - €{value['price']:.2f}"
     dish_options.append((label, key))
 
@@ -196,15 +224,11 @@ with col1:
 
         if submitted:
             if name:
-                total_price = dish_info["price"]
-
-                dish_display = dish_info["name"]
-
                 order = {
                     "name": name,
-                    "dish": f"{selected_key}. {dish_display}",
+                    "dish": f"{selected_key}. {dish_info['name']}",
                     "requests": special_requests if special_requests else "No special requests",
-                    "price": total_price,
+                    "price": dish_info["price"],
                     "time": datetime.now().strftime("%H:%M"),
                 }
                 st.session_state.orders.append(order)
@@ -233,15 +257,21 @@ with col2:
         """, unsafe_allow_html=True)
 
         st.markdown("---")
-        order_to_remove = st.number_input(
-            "Remove order (row #, starting at 0)",
-            min_value=0,
-            max_value=len(st.session_state.orders) - 1,
-            step=1,
-        )
-        if st.button("🗑️ Remove Order"):
-            st.session_state.orders.pop(order_to_remove)
-            st.rerun()
+        
+        # Better UI for removing orders - use selectbox with names
+        if len(st.session_state.orders) > 0:
+            order_labels = [f"{idx+1}. {order['name']} - {order['dish'][:30]}..." 
+                           for idx, order in enumerate(st.session_state.orders)]
+            
+            order_to_remove_label = st.selectbox(
+                "Select order to remove:",
+                options=order_labels
+            )
+            order_to_remove = order_labels.index(order_to_remove_label)
+            
+            if st.button("🗑️ Remove Selected Order"):
+                st.session_state.orders.pop(order_to_remove)
+                st.rerun()
 
         if st.button("💣 Clear Everything", use_container_width=True):
             st.session_state.orders = []

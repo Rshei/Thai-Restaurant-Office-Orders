@@ -1,4 +1,3 @@
-
 import streamlit as st
 from datetime import datetime
 import pandas as pd
@@ -34,7 +33,6 @@ st.markdown("""
 # MENU DATABASE - updated to match restaurant menu
 MENU = {
     # Suppen u. Vorspeisen
-    "0":  {"name": " ", "price": 3.00},
     "1":  {"name": "Eierblumensuppe (m. Hühnerfleisch)", "price": 3.00},
     "3":  {"name": "Glasnudeln-Suppe (mit Hühnerfleisch)", "price": 3.00},
     "5":  {"name": "Tom Kha-Gai Ram Suppe (m. Hühnerfleisch, Kokosmilch)", "price": 3.50},
@@ -175,6 +173,10 @@ for key, value in sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdi
     label = f"{key}. {value['name']} - €{value['price']:.2f}"
     dish_options.append((label, key))
 
+# Add a blank first option
+dish_options = [(" ", None)] + dish_options
+labels = [opt[0] for opt in dish_options]
+
 # Main layout: Order form on left, Order summary on right
 col1, col2 = st.columns([2, 1])
 
@@ -184,16 +186,25 @@ with col1:
     with st.form("order_form", clear_on_submit=True):
         name = st.text_input("Your Name 👤", placeholder="Who's hungry?")
 
-        # Select dish instead of free-text number
+        # Select dish with blank default
         selected_label = st.selectbox(
             "Choose your dish 🍽️",
-            options=[opt[0] for opt in dish_options],
+            options=labels,
             index=0
         )
-        # Map back to menu number
-        selected_key = next(k for (label, k) in dish_options if label == selected_label)
-        dish_info = MENU[selected_key]
-        st.info(f"✨ You chose: {selected_key}. {dish_info['name']} - €{dish_info['price']:.2f}")
+
+        # Map back to menu number (None if blank)
+        selected_key = next(
+            (k for (label, k) in dish_options if label == selected_label),
+            None
+        )
+
+        if selected_key is not None:
+            dish_info = MENU[selected_key]
+            st.info(f"✨ You chose: {selected_key}. {dish_info['name']} - €{dish_info['price']:.2f}")
+        else:
+            dish_info = None
+            st.info("👉 Please choose a dish from the list.")
 
         special_requests = st.text_area(
             "Special Requests 💬",
@@ -204,9 +215,12 @@ with col1:
         submitted = st.form_submit_button("🚀 Add My Order!", use_container_width=True)
 
         if submitted:
-            if name:
+            if not name:
+                st.error("⚠️ Hold up! Please fill in your name!")
+            elif dish_info is None:
+                st.error("⚠️ Please choose a dish before adding the order!")
+            else:
                 total_price = dish_info["price"]
-
                 dish_display = dish_info["name"]
 
                 order = {
@@ -218,8 +232,6 @@ with col1:
                 }
                 st.session_state.orders.append(order)
                 st.success(f"✨ Awesome! Added {name}'s order!")
-            else:
-                st.error("⚠️ Hold up! Please fill in your name!")
 
 with col2:
     st.markdown("### 📋 The Squad's Orders")

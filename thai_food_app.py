@@ -130,29 +130,35 @@ MENU = {
     "124": {"name": "Erdnuss-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 }
 
-# Customer Reviews data
+# Customer Reviews data (delivery-focused)
 CUSTOMER_REVIEWS = [
     {
-        "customer_name": "Alice S.",
+        "customer_name": "Laura W.",
         "rating": 5,
-        "review_text": "Absolutely loved the Pad Thai! So authentic and delicious. Will definitely order again!"
+        "review_text": "Fast delivery and super friendly courier! Everything arrived warm and on time. Great service!"
     },
     {
-        "customer_name": "Bob T.",
+        "customer_name": "Michael T.",
         "rating": 4,
-        "review_text": "Good service and quick delivery. The Red Curry with chicken was tasty, but a bit spicier than expected."
+        "review_text": "Delivery arrived earlier than expected. Smooth and professional handover. Would definitely order again."
     },
     {
-        "customer_name": "Charlie M.",
-        "rating": 3,
-        "review_text": "The Spring Rolls were great, but the noodle dish was a bit bland for my taste. Overall, decent."
-    },
-    {
-        "customer_name": "Dana L.",
+        "customer_name": "Sven K.",
         "rating": 5,
-        "review_text": "Fantastic Mango-Sauce Duck! The meat was crispy and the sauce was perfectly balanced."
+        "review_text": "The delivery driver was really polite and called ahead when he arrived. Excellent experience!"
+    },
+    {
+        "customer_name": "Julia R.",
+        "rating": 4,
+        "review_text": "Service was quick and organized. Appreciated the updates and the friendly attitude of the delivery person."
+    },
+    {
+        "customer_name": "Daniel B.",
+        "rating": 5,
+        "review_text": "Super reliable! This is the third time I order, and every delivery has been perfectly on time."
     }
 ]
+
 # Initialize session state for orders
 if "orders" not in st.session_state:
     st.session_state.orders = []

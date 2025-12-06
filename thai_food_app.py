@@ -311,6 +311,14 @@ with col2:
             </div>
         """, unsafe_allow_html=True)
 
+# Customer Reviews Section
+st.markdown("--- ✨ What Our Customers Say! ✨ ---")
+
+for review in CUSTOMER_REVIEWS:
+    st.markdown(f"**{review['customer_name']}** - {'⭐' * review['rating']}")
+    st.info(f"_{review['review_text']}_")
+    st.markdown("\n")  # Add some spacing between reviews
+
 # Footer
 st.markdown("---")
 st.markdown(

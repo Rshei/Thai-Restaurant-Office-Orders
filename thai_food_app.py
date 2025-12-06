@@ -1,33 +1,17 @@
+
 import streamlit as st
 from datetime import datetime
 import pandas as pd
-import random
 
 # Page configuration
-st.set_page_config(
-    page_title="Thai Food Order",
-    page_icon="🍜",
-    layout="wide",  # keep wide, we handle mobile via CSS
-)
+st.set_page_config(page_title="Thai Food Order", page_icon="🍜", layout="wide")
 
-# Custom CSS for better styling + MOBILE RESPONSIVENESS
+# Custom CSS for better styling
 st.markdown("""
     <style>
-    /* General background */
     .main {
         background-color: #f8f9fa;
     }
-
-    /* Make the main block container a bit tighter on mobile */
-    @media (max-width: 768px) {
-        .block-container {
-            padding-left: 0.5rem !important;
-            padding-right: 0.5rem !important;
-            padding-top: 0.5rem !important;
-        }
-    }
-
-    /* Buttons styling */
     .stButton>button {
         background-color: #ff6b6b;
         color: white;
@@ -41,40 +25,8 @@ st.markdown("""
         background-color: #ff5252;
         transform: scale(1.05);
     }
-
-    /* Make buttons full-width on mobile for easy tapping */
-    @media (max-width: 768px) {
-        .stButton>button {
-            width: 100% !important;
-            padding: 0.75rem 1rem;
-        }
-    }
-
-    /* DataFrame style */
     div[data-testid="stDataFrame"] {
         border-radius: 10px;
-    }
-
-    /* Make columns stack on small screens */
-    @media (max-width: 768px) {
-        div[data-testid="column"] {
-            width: 100% !important;
-            flex: 1 1 100% !important;
-            display: block !important;
-        }
-    }
-
-    /* Resize some headings on mobile */
-    @media (max-width: 768px) {
-        h1 {
-            font-size: 1.8rem !important;
-        }
-        h2 {
-            font-size: 1.3rem !important;
-        }
-        h3, h4 {
-            font-size: 1.1rem !important;
-        }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -82,6 +34,7 @@ st.markdown("""
 # MENU DATABASE - updated to match restaurant menu
 MENU = {
     # Suppen u. Vorspeisen
+    "0":  {"name": " ", "price": 3.00},
     "1":  {"name": "Eierblumensuppe (m. Hühnerfleisch)", "price": 3.00},
     "3":  {"name": "Glasnudeln-Suppe (mit Hühnerfleisch)", "price": 3.00},
     "5":  {"name": "Tom Kha-Gai Ram Suppe (m. Hühnerfleisch, Kokosmilch)", "price": 3.50},
@@ -126,7 +79,7 @@ MENU = {
     "52": {"name": "Chop Suey Rindfleisch", "price": 8.00},
     "53": {"name": "Chop Suey Ente paniert, kross gebacken", "price": 8.00},
     "54": {"name": "Chop Suey Garnelen (8 Stück)", "price": 9.00},
-    "55": {"name": "Chop Suey Hühnerbrust in Scheiben, kross gebacken", "price": 9.00},
+    "55": {"name": "Chop Suey Hühnerbrust in Scheiben, kross gebacken", "price": 8.00},
 
     # Süß-Sauer-Sauce (with Reis)
     "56": {"name": "Süß-Sauer Tofu (pikant, nach Thai-Art)", "price": 6.50},
@@ -136,7 +89,7 @@ MENU = {
     "58": {"name": "Süß-Sauer Garnelen (8 Stück), pikant, nach Thai-Art", "price": 9.00},
     "59": {"name": "Süß-Sauer Ente paniert, kross gebacken", "price": 9.00},
 
-    # Rote Curry-Sauce (with Reis)
+    # Rote Curry-Sauce (mit Reis)
     "60": {"name": "Rotes Curry Vegetarisch mit Tofu", "price": 6.50},
     "61": {"name": "Rotes Curry Hühnerfleisch", "price": 7.50},
     "62": {"name": "Rotes Curry Rindfleisch", "price": 8.00},
@@ -144,63 +97,39 @@ MENU = {
     "64": {"name": "Rotes Curry Garnelen (8 Stück)", "price": 9.00},
     "65": {"name": "Rotes Curry Hühnerbrust kross gebacken", "price": 8.00},
 
-    # Mango-Sauce (with Reis)
+    # Mango-Sauce (mit Reis)
     "80": {"name": "Mango-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "81": {"name": "Mango-Sauce Hühnerfleisch", "price": 7.50},
     "83": {"name": "Mango-Sauce Ente paniert kross gebacken", "price": 9.00},
     "85": {"name": "Mango-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 
-    # Knoblauch-Sauce (with Reis)
+    # Knoblauch-Sauce (mit Reis)
     "90": {"name": "Knoblauch-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "91": {"name": "Knoblauch-Sauce Hühnerfleisch", "price": 7.50},
     "92": {"name": "Knoblauch-Sauce Rindfleisch", "price": 8.00},
     "93": {"name": "Knoblauch-Sauce Ente paniert kross gebacken", "price": 9.00},
     "95": {"name": "Knoblauch-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 
-    # Ingwer-Sauce (with Reis)
+    # Ingwer-Sauce (mit Reis)
     "100": {"name": "Ingwer-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "101": {"name": "Ingwer-Sauce Hühnerfleisch", "price": 7.50},
     "102": {"name": "Ingwer-Sauce Rindfleisch", "price": 8.00},
     "103": {"name": "Ingwer-Sauce Ente paniert kross gebacken", "price": 9.00},
     "105": {"name": "Ingwer-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 
-    # Zitronengras-Sauce (with Reis)
+    # Zitronengras-Sauce (mit Reis)
     "110": {"name": "Zitronengras-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "111": {"name": "Zitronengras-Sauce Hühnerfleisch", "price": 7.50},
     "112": {"name": "Zitronengras-Sauce Rindfleisch", "price": 8.00},
     "113": {"name": "Zitronengras-Sauce Ente paniert kross gebacken", "price": 9.00},
     "115": {"name": "Zitronengras-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 
-    # Erdnuss-Sauce (with Reis)
+    # Erdnuss-Sauce (mit Reis)
     "120": {"name": "Erdnuss-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "121": {"name": "Erdnuss-Sauce Hühnerfleisch", "price": 7.50},
     "123": {"name": "Erdnuss-Sauce Ente paniert kross gebacken", "price": 9.00},
     "124": {"name": "Erdnuss-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 }
-
-# Customer Reviews data
-CUSTOMER_REVIEWS = [
-    {
-        "customer_name": "Alice S.",
-        "rating": 5,
-        "review_text": "Absolutely loved the Pad Thai! So authentic and delicious. Will definitely order again!"
-    },
-    {
-        "customer_name": "Bob T.",
-        "rating": 4,
-        "review_text": "Good service and quick delivery. The Red Curry with chicken was tasty, but a bit spicier than expected."
-    },
-    {
-        "customer_name": "Charlie M.",
-        "rating": 3,
-        "review_text": "The Spring Rolls were great, but the noodle dish was a bit bland for my taste. Overall, decent."
-    },
-    {
-        "customer_name": "Dana L.",
-        "rating": 5,
-        "review_text": "Fantastic Mango-Sauce Duck! The meat was crispy and the sauce was perfectly balanced."
-    }
-]
 
 # Initialize session state for orders
 if "orders" not in st.session_state:
@@ -218,22 +147,14 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Menu link section
-MENU_URL = "https://www.google.com/maps/place/Thien+Thai+Bistro/@52.5364437,13.2723721,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDZruezGQ!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAG0ilSyjaUPfX_bg9cANspvtJgqf6qGUB3hTyNN8bkwRMCiCzpOZQn7hvozHQvIqqUefUHo5ywJ6ZYweysXOCSP05KNw_VqQlybBnJJgbh2Dn-3jtWL6ERtiGrE_n_geRKhC-eDcqPV7%3Dw146-h195-k-no!7i3000!8i4000!4m10!1m2!1ssiemens+damm!3m6!1s0x47a856c7885ec39d:0xe8d8c1bdc6419318!8m2!3d52.5362941!4d13.272357!10e9!16s%2Fg%2F11bxc5hddn?entry=ttu&g_ep=EgoyMDI1MTIwMi4wIKXMDSoASAFQAw%3D%3D"
+MENU_URL = "https://www.google.com/maps/place/Thien+Thai+Bistro/@52.5364437,13.2723721,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDZruezGQ!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAG0ilSyjaUPfX_bg9cANspvtJgqf6qGUB3hTyNN8bkwRMCiCzpOZQn7hvozHQvIqqUefUHo5ywJ6ZYweysXOCSP05KNw_VqQlybBnJJgbh2Dn-3jtWL6ERtiGrE_n_geRKhC-eDcqPV7%3Dw146-h195-k-no!7i3000!8i4000!4m10!1m2!2m1!1ssiemens+damm!3m6!1s0x47a856c7885ec39d:0xe8d8c1bdc6419318!8m2!3d52.5362941!4d13.272357!10e9!16s%2Fg%2F11bxc5hddn?entry=ttu&g_ep=EgoyMDI1MTIwMi4wIKXMDSoASAFQAw%3D%3D"
 
 st.markdown(f"""
     <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 15px; margin-bottom: 2rem;'>
-        <a href='{MENU_URL}' target='_blank' style='color: white; text-decoration: none; font-size: 1.1rem; font-weight: bold;'>
+        <a href='{MENU_URL}' target='_blank' style='color: white; text-decoration: none; font-size: 1.2rem; font-weight: bold;'>
             📱 Check Out The Menu 🌶️
         </a>
-    </div>
-""", unsafe_allow_html=True)
-
-# Special of the Day
-st.markdown("""
-    <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #f7b733 0%, #fc4a1a 100%);
-    border-radius: 10px; margin-bottom: 2rem;'>
-        <h2 style='color: white; margin: 0;'>✨ Our special today is... ✨</h2>
     </div>
 """, unsafe_allow_html=True)
 
@@ -255,7 +176,6 @@ for key, value in sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdi
     dish_options.append((label, key))
 
 # Main layout: Order form on left, Order summary on right
-# (Stacks to single column on mobile via CSS)
 col1, col2 = st.columns([2, 1])
 
 with col1:
@@ -320,7 +240,7 @@ with col2:
             </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("--- ")
+        st.markdown("---")
         order_to_remove = st.number_input(
             "Remove order (row #, starting at 0)",
             min_value=0,
@@ -355,17 +275,9 @@ with col2:
             </div>
         """, unsafe_allow_html=True)
 
-# Customer Reviews Section
-st.markdown("--- ✨ What Our Customers Say! ✨ ---")
-
-for review in CUSTOMER_REVIEWS:
-    st.markdown(f"**{review['customer_name']}** - {'⭐' * review['rating']}")
-    st.info(f"_{review['review_text']}_")
-    st.markdown("\n")  # Add some spacing between reviews
-
 # Footer
-st.markdown("--- ")
+st.markdown("---")
 st.markdown(
-    "<p style='text-align: center; color: #666;'>🚶 This app built by your friendly office delivery service | 💶 Cash only vibes</p>",
+    "<p style='text-align: center; color: #666;'>🚶This app built by Your friendly office delivery service | 💶 Cash only vibes</p>",
     unsafe_allow_html=True,
 )

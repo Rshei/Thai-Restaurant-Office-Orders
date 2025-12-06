@@ -34,6 +34,7 @@ st.markdown("""
 # MENU DATABASE - updated to match restaurant menu
 MENU = {
     # Suppen u. Vorspeisen
+    "0":  {"name": " ", "price": 3.00},
     "1":  {"name": "Eierblumensuppe (m. Hühnerfleisch)", "price": 3.00},
     "3":  {"name": "Glasnudeln-Suppe (mit Hühnerfleisch)", "price": 3.00},
     "5":  {"name": "Tom Kha-Gai Ram Suppe (m. Hühnerfleisch, Kokosmilch)", "price": 3.50},

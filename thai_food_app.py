@@ -130,6 +130,29 @@ MENU = {
     "124": {"name": "Erdnuss-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 }
 
+# Customer Reviews data
+CUSTOMER_REVIEWS = [
+    {
+        "customer_name": "Alice S.",
+        "rating": 5,
+        "review_text": "Absolutely loved the Pad Thai! So authentic and delicious. Will definitely order again!"
+    },
+    {
+        "customer_name": "Bob T.",
+        "rating": 4,
+        "review_text": "Good service and quick delivery. The Red Curry with chicken was tasty, but a bit spicier than expected."
+    },
+    {
+        "customer_name": "Charlie M.",
+        "rating": 3,
+        "review_text": "The Spring Rolls were great, but the noodle dish was a bit bland for my taste. Overall, decent."
+    },
+    {
+        "customer_name": "Dana L.",
+        "rating": 5,
+        "review_text": "Fantastic Mango-Sauce Duck! The meat was crispy and the sauce was perfectly balanced."
+    }
+]
 # Initialize session state for orders
 if "orders" not in st.session_state:
     st.session_state.orders = []

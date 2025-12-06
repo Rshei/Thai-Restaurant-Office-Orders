@@ -4,14 +4,30 @@ import pandas as pd
 import random
 
 # Page configuration
-st.set_page_config(page_title="Thai Food Order", page_icon="🍜", layout="wide")
+st.set_page_config(
+    page_title="Thai Food Order",
+    page_icon="🍜",
+    layout="wide",  # keep wide, we handle mobile via CSS
+)
 
-# Custom CSS for better styling
+# Custom CSS for better styling + MOBILE RESPONSIVENESS
 st.markdown("""
     <style>
+    /* General background */
     .main {
         background-color: #f8f9fa;
     }
+
+    /* Make the main block container a bit tighter on mobile */
+    @media (max-width: 768px) {
+        .block-container {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+            padding-top: 0.5rem !important;
+        }
+    }
+
+    /* Buttons styling */
     .stButton>button {
         background-color: #ff6b6b;
         color: white;
@@ -25,8 +41,40 @@ st.markdown("""
         background-color: #ff5252;
         transform: scale(1.05);
     }
+
+    /* Make buttons full-width on mobile for easy tapping */
+    @media (max-width: 768px) {
+        .stButton>button {
+            width: 100% !important;
+            padding: 0.75rem 1rem;
+        }
+    }
+
+    /* DataFrame style */
     div[data-testid="stDataFrame"] {
         border-radius: 10px;
+    }
+
+    /* Make columns stack on small screens */
+    @media (max-width: 768px) {
+        div[data-testid="column"] {
+            width: 100% !important;
+            flex: 1 1 100% !important;
+            display: block !important;
+        }
+    }
+
+    /* Resize some headings on mobile */
+    @media (max-width: 768px) {
+        h1 {
+            font-size: 1.8rem !important;
+        }
+        h2 {
+            font-size: 1.3rem !important;
+        }
+        h3, h4 {
+            font-size: 1.1rem !important;
+        }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -175,7 +223,7 @@ MENU_URL = "https://www.google.com/maps/place/Thien+Thai+Bistro/@52.5364437,13.2
 st.markdown(f"""
     <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 15px; margin-bottom: 2rem;'>
-        <a href='{MENU_URL}' target='_blank' style='color: white; text-decoration: none; font-size: 1.2rem; font-weight: bold;'>
+        <a href='{MENU_URL}' target='_blank' style='color: white; text-decoration: none; font-size: 1.1rem; font-weight: bold;'>
             📱 Check Out The Menu 🌶️
         </a>
     </div>
@@ -186,8 +234,8 @@ st.markdown("""
     <div style='text-align: center; padding: 1rem; background: linear-gradient(135deg, #f7b733 0%, #fc4a1a 100%);
     border-radius: 10px; margin-bottom: 2rem;'>
         <h2 style='color: white; margin: 0;'>✨ Our special today is... ✨</h2>
+    </div>
 """, unsafe_allow_html=True)
-
 
 # Quick Menu Reference
 with st.expander("📖 Quick Menu Reference", expanded=False):
@@ -202,11 +250,12 @@ with st.expander("📖 Quick Menu Reference", expanded=False):
 
 # Build options for selectbox: "num - name (€price)"
 dish_options = []
-for key, value in sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdigit, x[0])) or 0)):
+for key, value in sorted(MENU.items(), key=lambda x: int('''.join(filter(str.isdigit, x[0])) or 0)):
     label = f"{key}. {value['name']} - €{value['price']:.2f}"
     dish_options.append((label, key))
 
 # Main layout: Order form on left, Order summary on right
+# (Stacks to single column on mobile via CSS)
 col1, col2 = st.columns([2, 1])
 
 with col1:
@@ -312,11 +361,11 @@ st.markdown("--- ✨ What Our Customers Say! ✨ ---")
 for review in CUSTOMER_REVIEWS:
     st.markdown(f"**{review['customer_name']}** - {'⭐' * review['rating']}")
     st.info(f"_{review['review_text']}_")
-    st.markdown("\n") # Add some spacing between reviews
+    st.markdown("\n")  # Add some spacing between reviews
 
 # Footer
 st.markdown("--- ")
 st.markdown(
-    "<p style='text-align: center; color: #666;'>🚶 This app built by Your friendly office delivery service | 💶 Cash only vibes</p>",
+    "<p style='text-align: center; color: #666;'>🚶 This app built by your friendly office delivery service | 💶 Cash only vibes</p>",
     unsafe_allow_html=True,
 )

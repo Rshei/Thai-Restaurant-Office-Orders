@@ -250,7 +250,7 @@ with st.expander("📖 Quick Menu Reference", expanded=False):
 
 # Build options for selectbox: "num - name (€price)"
 dish_options = []
-for key, value in sorted(MENU.items(), key=lambda x: int('''.join(filter(str.isdigit, x[0])) or 0)):
+for key, value in sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdigit, x[0])) or 0)):
     label = f"{key}. {value['name']} - €{value['price']:.2f}"
     dish_options.append((label, key))
 

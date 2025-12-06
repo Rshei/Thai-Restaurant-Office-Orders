@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime
+from zoneinfo import ZoneInfo  
 import pandas as pd
 
 # Page configuration
@@ -228,7 +229,7 @@ with col1:
                     "dish": f"{selected_key}. {dish_display}",
                     "requests": special_requests if special_requests else "No special requests",
                     "price": total_price,
-                    "time": datetime.now().strftime("%H:%M"),
+                    "time": datetime.now(ZoneInfo("Europe/Berlin")).strftime("%H:%M"),
                 }
                 st.session_state.orders.append(order)
                 st.success(f"✨ Awesome! Added {name}'s order!")

@@ -303,10 +303,6 @@ with col2:
                 st.warning("Invalid order number to remove.")
             st.rerun()
 
-        if st.button("💣 Clear Everything", use_container_width=True):
-            shared_orders.clear() # Clear the shared list
-            st.rerun()
-
         if st.button("📋 Copy Order List", use_container_width=True):
             summary = "🍜 THAI FOOD SQUAD ORDERS 🍜\n" + "=" * 35 + "\n\n"
             for idx, order in enumerate(shared_orders, 1):

@@ -1,8 +1,9 @@
+!pip install streamlit
 import streamlit as st
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import pandas as pd
-import json # Added for JSON serialization/deserialization
+import json
 
 # Page configuration
 st.set_page_config(page_title="Thai Food Order", page_icon="🍜", layout="wide")
@@ -97,20 +98,20 @@ MENU = {
     "64": {"name": "Rotes Curry Garnelen (8 Stück)", "price": 9.00},
     "65": {"name": "Rotes Curry Hühnerbrust kross gebacken", "price": 8.00},
 
-    # Mango-Sauce (mit Reis)
+    # Mango-Sauce (with Reis)
     "80": {"name": "Mango-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "81": {"name": "Mango-Sauce Hühnerfleisch", "price": 7.50},
     "83": {"name": "Mango-Sauce Ente paniert kross gebacken", "price": 9.00},
     "85": {"name": "Mango-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 
-    # Knoblauch-Sauce (mit Reis)
+    # Knoblauch-Sauce (with Reis)
     "90": {"name": "Knoblauch-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "91": {"name": "Knoblauch-Sauce Hühnerfleisch", "price": 7.50},
     "92": {"name": "Knoblauch-Sauce Rindfleisch", "price": 8.00},
     "93": {"name": "Knoblauch-Sauce Ente paniert kross gebacken", "price": 9.00},
     "95": {"name": "Knoblauch-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 
-    # Ingwer-Sauce (mit Reis)
+    # Ingwer-Sauce (with Reis)
     "100": {"name": "Ingwer-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "101": {"name": "Ingwer-Sauce Hühnerfleisch", "price": 7.50},
     "102": {"name": "Ingwer-Sauce Rindfleisch", "price": 8.00},
@@ -165,18 +166,18 @@ def update_query_params():
     # Only update if there are orders, otherwise remove the param to keep URL clean
     if st.session_state.orders:
         serialized_orders = json.dumps(st.session_state.orders)
-        st.experimental_set_query_params(orders=serialized_orders)
+        st.query_params["orders"] = serialized_orders # Updated
     else:
         # If orders are empty, remove 'orders' from query params
-        st.experimental_set_query_params(orders=None)
+        del st.query_params["orders"] # Updated
 
 # Initialize session state for orders to be persistent across hard refreshes
 if "orders" not in st.session_state:
-    query_params = st.experimental_get_query_params()
-    if "orders" in query_params and query_params["orders"] and query_params["orders"][0]:
+    # st.query_params directly returns a dict-like object
+    if "orders" in st.query_params and st.query_params["orders"]:
         try:
-            # Query parameters values are lists of strings, so we take the first item
-            st.session_state.orders = json.loads(query_params["orders"][0])
+            # st.query_params values are strings
+            st.session_state.orders = json.loads(st.query_params["orders"])
         except json.JSONDecodeError:
             st.session_state.orders = [] # Fallback if JSON is invalid
     else:
@@ -311,7 +312,7 @@ with col2:
             key="remove_order_input"
         )
         if st.button("🗑️ Remove Order"):
-            if 0 <= order_to_remove < len(st.session_state.orders): # Added bounds check
+            if 0 <= order_to_remove < len(st.session_state.orders):
                 st.session_state.orders.pop(order_to_remove)
                 update_query_params() # Call to update URL
             else:

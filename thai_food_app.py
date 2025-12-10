@@ -289,18 +289,28 @@ with col2:
         """, unsafe_allow_html=True)
 
         st.markdown("---")
-        order_to_remove = st.number_input(
-            "Remove order (row #, starting at 0)",
-            min_value=0,
-            max_value=len(shared_orders) - 1 if shared_orders else 0,
-            step=1,
-            key="remove_order_input"
+        name_to_remove = st.text_input(
+            "Enter name to remove order: ",
+            key="remove_order_by_name_input"
         )
-        if st.button("🗑️ Remove Order"):
-            if 0 <= order_to_remove < len(shared_orders):
-                shared_orders.pop(order_to_remove)
+
+        if st.button("🗑️ Remove Order by Name"): # Changed button text
+            if name_to_remove:
+                original_len = len(shared_orders)
+                # Find and remove the first order matching the name
+                for i, order in enumerate(shared_orders):
+                    if order["name"].lower() == name_to_remove.lower():
+                        shared_orders.pop(i)
+                        st.success(f"Removed {name_to_remove}'s order.")
+                        break
+                if len(shared_orders) == original_len:
+                    st.warning(f"No order found for {name_to_remove}.")
             else:
-                st.warning("Invalid order number to remove.")
+                st.warning("Please enter a name to remove an order.")
+            st.rerun()
+
+        if st.button("💣 Clear Everything", use_container_width=True):
+            shared_orders.clear() # Clear the shared list
             st.rerun()
 
         if st.button("📋 Copy Order List", use_container_width=True):

@@ -1,7 +1,8 @@
 import streamlit as st
 from datetime import datetime
-from zoneinfo import ZoneInfo  
+from zoneinfo import ZoneInfo
 import pandas as pd
+import json # Added for JSON serialization/deserialization
 
 # Page configuration
 st.set_page_config(page_title="Thai Food Order", page_icon="🍜", layout="wide")
@@ -116,14 +117,14 @@ MENU = {
     "103": {"name": "Ingwer-Sauce Ente paniert kross gebacken", "price": 9.00},
     "105": {"name": "Ingwer-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 
-    # Zitronengras-Sauce (mit Reis)
+    # Zitronengras-Sauce (with Reis)
     "110": {"name": "Zitronengras-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "111": {"name": "Zitronengras-Sauce Hühnerfleisch", "price": 7.50},
     "112": {"name": "Zitronengras-Sauce Rindfleisch", "price": 8.00},
     "113": {"name": "Zitronengras-Sauce Ente paniert kross gebacken", "price": 9.00},
     "115": {"name": "Zitronengras-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 
-    # Erdnuss-Sauce (mit Reis)
+    # Erdnuss-Sauce (with Reis)
     "120": {"name": "Erdnuss-Sauce Vegetarisch mit Tofu", "price": 6.50},
     "121": {"name": "Erdnuss-Sauce Hühnerfleisch", "price": 7.50},
     "123": {"name": "Erdnuss-Sauce Ente paniert kross gebacken", "price": 9.00},
@@ -159,9 +160,27 @@ CUSTOMER_REVIEWS = [
     }
 ]
 
-# Initialize session state for orders
+# Function to update query parameters with current orders state
+def update_query_params():
+    # Only update if there are orders, otherwise remove the param to keep URL clean
+    if st.session_state.orders:
+        serialized_orders = json.dumps(st.session_state.orders)
+        st.experimental_set_query_params(orders=serialized_orders)
+    else:
+        # If orders are empty, remove 'orders' from query params
+        st.experimental_set_query_params(orders=None)
+
+# Initialize session state for orders to be persistent across hard refreshes
 if "orders" not in st.session_state:
-    st.session_state.orders = []
+    query_params = st.experimental_get_query_params()
+    if "orders" in query_params and query_params["orders"] and query_params["orders"][0]:
+        try:
+            # Query parameters values are lists of strings, so we take the first item
+            st.session_state.orders = json.loads(query_params["orders"][0])
+        except json.JSONDecodeError:
+            st.session_state.orders = [] # Fallback if JSON is invalid
+    else:
+        st.session_state.orders = []
 
 # Fun header
 st.markdown("<h1 style='text-align: center; color: #ff6b6b;'>🍜 Thai Lunch Squad 🔥</h1>", unsafe_allow_html=True)
@@ -261,6 +280,7 @@ with col1:
                     "time": datetime.now(ZoneInfo("Europe/Berlin")).strftime("%H:%M"),
                 }
                 st.session_state.orders.append(order)
+                update_query_params() # Call to update URL
                 st.success(f"✨ Awesome! Added {name}'s order!")
 
 with col2:
@@ -286,15 +306,21 @@ with col2:
         order_to_remove = st.number_input(
             "Remove order (row #, starting at 0)",
             min_value=0,
-            max_value=len(st.session_state.orders) - 1,
+            max_value=len(st.session_state.orders) - 1 if st.session_state.orders else 0,
             step=1,
+            key="remove_order_input"
         )
         if st.button("🗑️ Remove Order"):
-            st.session_state.orders.pop(order_to_remove)
+            if 0 <= order_to_remove < len(st.session_state.orders): # Added bounds check
+                st.session_state.orders.pop(order_to_remove)
+                update_query_params() # Call to update URL
+            else:
+                st.warning("Invalid order number to remove.")
             st.rerun()
 
         if st.button("💣 Clear Everything", use_container_width=True):
             st.session_state.orders = []
+            update_query_params() # Call to update URL
             st.rerun()
 
         if st.button("📋 Copy Order List", use_container_width=True):
@@ -315,7 +341,7 @@ with col2:
                 <h3>🤔 No orders yet!</h3>
                 <p>Be the first one to order! 🚀</p>
             </div>
-        """, unsafe_allow_html=True)
+""")
 
 # Customer Reviews Section
 st.markdown("--- ✨ What Our Customers Say! ✨ ---")

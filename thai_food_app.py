@@ -309,9 +309,6 @@ with col2:
                 st.warning("Please enter a name to remove an order.")
             st.rerun()
 
-        if st.button("💣 Clear Everything", use_container_width=True):
-            shared_orders.clear() # Clear the shared list
-            st.rerun()
 
         if st.button("📋 Copy Order List", use_container_width=True):
             summary = "🍜 THAI FOOD SQUAD ORDERS 🍜\n" + "=" * 35 + "\n\n"

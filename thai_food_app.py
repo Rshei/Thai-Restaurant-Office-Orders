@@ -335,14 +335,9 @@ with col2:
             summary += "💵 Payment: CASH to delivery hero"
 
             st.code(summary, language=None)
-    else:
-        st.markdown("""
-            <div style='text-align: center; padding: 2rem; background-color: #fff3cd;
-            border-radius: 10px; border: 2px dashed #ffc107;'>
-                <h3>No order yet!</h3>
-            </div>
-""")
-        st.markdown("No order yet!")
+            
+    else:  st.markdown("No order yet!")
+       
 
 # Customer Reviews Section
 st.markdown("--- ✨ What Our Customers Say! ✨ ---")

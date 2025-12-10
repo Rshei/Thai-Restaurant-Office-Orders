@@ -342,6 +342,7 @@ with col2:
                 <h3>No order yet!</h3>
             </div>
 """)
+        st.markdown("No order yet!")
 
 # Customer Reviews Section
 st.markdown("--- ✨ What Our Customers Say! ✨ ---")

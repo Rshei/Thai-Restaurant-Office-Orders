@@ -1,4 +1,3 @@
-
 import streamlit as st
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -33,7 +32,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# MENU DATABASE - updated to match restaurant menu
+# ----- SIMPLE "LOGIN" / USER IDENTIFICATION -----
+st.sidebar.header("Who are you?")
+user_name = st.sidebar.text_input("Your Name 👤 (required)", key="user_name")
+
+if not user_name:
+    st.warning("Please enter your name in the sidebar to start ordering.")
+    st.stop()
+
+# MENU DATABASE
 MENU = {
     # Suppen u. Vorspeisen
     "1":  {"name": "Eierblumensuppe (m. Hühnerfleisch)", "price": 3.00},
@@ -132,7 +139,7 @@ MENU = {
     "124": {"name": "Erdnuss-Sauce Hühnerbrust paniert kross gebacken", "price": 8.00},
 }
 
-# Customer Reviews data (delivery-focused)
+# Customer Reviews data
 CUSTOMER_REVIEWS = [
     {
         "customer_name": "Laura W.",
@@ -161,27 +168,25 @@ CUSTOMER_REVIEWS = [
     }
 ]
 
-# Function to update query parameters with current orders state
-def update_query_params():
-    # Only update if there are orders, otherwise remove the param to keep URL clean
-    if st.session_state.orders:
-        serialized_orders = json.dumps(st.session_state.orders)
-        st.query_params["orders"] = serialized_orders # Updated
-    else:
-        # If orders are empty, remove 'orders' from query params
-        del st.query_params["orders"] # Updated
-
-# Initialize session state for orders to be persistent across hard refreshes
+# ----- ORDERS STATE: PER-USER STRUCTURE -----
 if "orders" not in st.session_state:
-    # st.query_params directly returns a dict-like object
+    # dict: {user_name: [order, ...]}
+    # you can still serialize entire dict to query_params if you want sharing/persistence
     if "orders" in st.query_params and st.query_params["orders"]:
         try:
-            # st.query_params values are strings
             st.session_state.orders = json.loads(st.query_params["orders"])
         except json.JSONDecodeError:
-            st.session_state.orders = [] # Fallback if JSON is invalid
+            st.session_state.orders = {}
     else:
-        st.session_state.orders = []
+        st.session_state.orders = {}
+
+def update_query_params():
+    if st.session_state.orders:
+        serialized_orders = json.dumps(st.session_state.orders)
+        st.query_params["orders"] = serialized_orders
+    else:
+        if "orders" in st.query_params:
+            del st.query_params["orders"]
 
 # Fun header
 st.markdown("<h1 style='text-align: center; color: #ff6b6b;'>🍜 Thai Lunch Squad 🔥</h1>", unsafe_allow_html=True)
@@ -209,7 +214,6 @@ st.markdown(f"""
 # Quick Menu Reference
 with st.expander("📖 Quick Menu Reference", expanded=False):
     col_menu1, col_menu2, col_menu3 = st.columns(3)
-    # sort by numeric key
     menu_items = sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdigit, x[0])) or 0))
 
     for idx, (num, item) in enumerate(menu_items):
@@ -217,13 +221,12 @@ with st.expander("📖 Quick Menu Reference", expanded=False):
         with col:
             st.markdown(f"**{num}.** {item['name']} - €{item['price']:.2f}")
 
-# Build options for selectbox: "num - name (€price)"
+# Build options for selectbox
 dish_options = []
 for key, value in sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdigit, x[0])) or 0)):
     label = f"{key}. {value['name']} - €{value['price']:.2f}"
     dish_options.append((label, key))
 
-# Add a blank first option
 dish_options = [(" ", None)] + dish_options
 labels = [opt[0] for opt in dish_options]
 
@@ -234,16 +237,14 @@ with col1:
     st.markdown("### 🎯 Place Your Order")
 
     with st.form("order_form", clear_on_submit=True):
-        name = st.text_input("Your Name 👤", placeholder="Who's hungry?")
+        name = st.text_input("Your Name 👤", value=user_name, disabled=True)
 
-        # Select dish with blank default
         selected_label = st.selectbox(
             "Choose your dish 🍽️",
             options=labels,
             index=0
         )
 
-        # Map back to menu number (None if blank)
         selected_key = next(
             (k for (label, k) in dish_options if label == selected_label),
             None
@@ -265,36 +266,36 @@ with col1:
         submitted = st.form_submit_button("🚀 Add My Order!", use_container_width=True)
 
         if submitted:
-            if not name:
-                st.error("⚠️ Hold up! Please fill in your name!")
-            elif dish_info is None:
+            if dish_info is None:
                 st.error("⚠️ Please choose a dish before adding the order!")
             else:
                 total_price = dish_info["price"]
                 dish_display = dish_info["name"]
 
                 order = {
-                    "name": name,
+                    "name": user_name,
                     "dish": f"{selected_key}. {dish_display}",
                     "requests": special_requests if special_requests else "No special requests",
                     "price": total_price,
                     "time": datetime.now(ZoneInfo("Europe/Berlin")).strftime("%H:%M"),
                 }
-                st.session_state.orders.append(order)
-                update_query_params() # Call to update URL
-                st.success(f"✨ Awesome! Added {name}'s order!")
+                st.session_state.orders.setdefault(user_name, []).append(order)
+                update_query_params()
+                st.success(f"✨ Awesome! Added {user_name}'s order!")
 
 with col2:
-    st.markdown("### 📋 The Squad's Orders")
+    st.markdown("### 📋 Your Orders")
 
-    if st.session_state.orders:
-        df = pd.DataFrame(st.session_state.orders)
+    user_orders = st.session_state.orders.get(user_name, [])
+
+    if user_orders:
+        df = pd.DataFrame(user_orders)
         df = df[["name", "dish", "requests", "price", "time"]]
         df.columns = ["Name", "Dish", "Notes", "€", "Time"]
 
         st.dataframe(df, use_container_width=True, hide_index=True)
 
-        total = sum(order["price"] for order in st.session_state.orders)
+        total = sum(order["price"] for order in user_orders)
         st.markdown(f"""
             <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             padding: 1rem; border-radius: 10px; text-align: center; margin: 1rem 0;'>
@@ -307,26 +308,27 @@ with col2:
         order_to_remove = st.number_input(
             "Remove order (row #, starting at 0)",
             min_value=0,
-            max_value=len(st.session_state.orders) - 1 if st.session_state.orders else 0,
+            max_value=len(user_orders) - 1 if user_orders else 0,
             step=1,
             key="remove_order_input"
         )
         if st.button("🗑️ Remove Order"):
-            if 0 <= order_to_remove < len(st.session_state.orders):
-                st.session_state.orders.pop(order_to_remove)
-                update_query_params() # Call to update URL
+            if 0 <= order_to_remove < len(user_orders):
+                user_orders.pop(order_to_remove)
+                st.session_state.orders[user_name] = user_orders
+                update_query_params()
             else:
                 st.warning("Invalid order number to remove.")
             st.rerun()
 
         if st.button("💣 Clear Everything", use_container_width=True):
-            st.session_state.orders = []
-            update_query_params() # Call to update URL
+            st.session_state.orders[user_name] = []
+            update_query_params()
             st.rerun()
 
         if st.button("📋 Copy Order List", use_container_width=True):
             summary = "🍜 THAI FOOD SQUAD ORDERS 🍜\n" + "=" * 35 + "\n\n"
-            for idx, order in enumerate(st.session_state.orders, 1):
+            for idx, order in enumerate(user_orders, 1):
                 summary += f"{idx}. {order['name']}\n"
                 summary += f"   🍽️ {order['dish']}\n"
                 summary += f"   💬 {order['requests']}\n"
@@ -335,9 +337,13 @@ with col2:
             summary += "💵 Payment: CASH to delivery hero"
 
             st.code(summary, language=None)
-            
-    else:  st.markdown("No order yet!")
-       
+    else:
+        st.markdown("""
+            <div style='text-align: center; padding: 2rem; background-color: #fff3cd;
+            border-radius: 10px; border: 2px dashed #ffc107;'>
+                <h3>No order yet!</h3>
+            </div>
+        """, unsafe_allow_html=True)
 
 # Customer Reviews Section
 st.markdown("--- ✨ What Our Customers Say! ✨ ---")
@@ -345,11 +351,11 @@ st.markdown("--- ✨ What Our Customers Say! ✨ ---")
 for review in CUSTOMER_REVIEWS:
     st.markdown(f"**{review['customer_name']}** - {'⭐' * review['rating']}")
     st.info(f"_{review['review_text']}_")
-    st.markdown("\n")  # Add some spacing between reviews
+    st.markdown("\n")
 
 # Footer
 st.markdown("---")
 st.markdown(
-    "<p style='text-align: center; color: #666;'>🚶This app built by Your friendly office delivery service | 💶 Cash only vibes</p>",
+    "<p style='text-align: center; color: #666;'>🚶This app built by your friendly office delivery service | 💶 Cash only vibes</p>",
     unsafe_allow_html=True,
 )

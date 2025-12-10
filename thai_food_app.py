@@ -339,8 +339,7 @@ with col2:
         st.markdown("""
             <div style='text-align: center; padding: 2rem; background-color: #fff3cd;
             border-radius: 10px; border: 2px dashed #ffc107;'>
-                <h3>🤔 No orders yet!</h3>
-                <p>Be the first one to order! 🚀</p>
+                <h3>No order yet!</h3>
             </div>
 """)
 

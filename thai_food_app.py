@@ -38,7 +38,7 @@ MENU = {
     "1":  {"name": "Eierblumensuppe (m. Hühnerfleisch)", "price": 4.00},
     "3":  {"name": "Glasnudeln-Suppe (mit Hühnerfleisch)", "price": 4.00},
     "5":  {"name": "Tom Kha-Gai Ram Suppe (m. Hühnerfleisch, Kokosmilch)", "price": 4.50},
-    "6":  {"name": "Tom Yam-Gung Thai-Suppe (m. Garnelen)", "price": 4.60},
+    "6":  {"name": "Tom Yam-Gung Thai-Suppe (m. Garnelen)", "price": 4.50},
     "7":  {"name": "Sauer-Scharf-Suppe (m. Hühnerfleisch)", "price": 4.00},
     "8":  {"name": "Wan-Tan-Suppe (m. Hühnerfleisch-Füllung)", "price": 4.00},
     "18": {"name": "Frühlingsrollen vegetarisch (8 Stück)", "price": 4.00},
@@ -77,15 +77,15 @@ MENU = {
     "51a": {"name": "Chop Suey Hühnerfleisch", "price": 7.50},
     "51b": {"name": "Chop Suey Hühnerbrust in Stück, doppelt gebacken", "price": 9.00},
     "52": {"name": "Chop Suey Rindfleisch", "price": 9.00},
-    "53": {"name": "Chop Suey Ente paniert, kross gebacken", "price": 9.00},
+    "53": {"name": "Chop Suey Ente paniert, kross gebacken", "price": 10.00},
     "54": {"name": "Chop Suey Garnelen (8 Stück)", "price": 10.00},
-    "55": {"name": "Chop Suey Hühnerbrust in Scheiben, kross gebacken", "price": 10.00},
+    "55": {"name": "Chop Suey Hühnerbrust in Scheiben, kross gebacken", "price": 9.00},
 
     # Süß-Sauer-Sauce (mit Reis)
     "56": {"name": "Süß-Sauer Tofu (pikant, nach Thai-Art)", "price": 7.50},
-    "57a": {"name": "Süß-Sauer Hühnerfleisch (pikant, nach Thai-Art)", "price": 9.00},
+    "57a": {"name": "Süß-Sauer Hühnerfleisch (pikant, nach Thai-Art)", "price": 7.50},
     "57b": {"name": "Süß-Sauer Hühnerbrust in Stück, doppelt gebacken", "price": 9.00},
-    "57c": {"name": "Süß-Sauer Hühnerbrust in Scheibe, kross gebacken", "price": 10.00},
+    "57c": {"name": "Süß-Sauer Hühnerbrust in Scheibe, kross gebacken", "price": 9.00},
     "58": {"name": "Süß-Sauer Garnelen (8 Stück), pikant, nach Thai-Art", "price": 10.00},
     "59": {"name": "Süß-Sauer Ente paniert, kross gebacken", "price": 10.00},
 

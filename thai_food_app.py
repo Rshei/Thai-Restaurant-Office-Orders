@@ -230,12 +230,12 @@ else:
             <h1 style='color: white; margin: 0.5rem 0; font-size: 3rem; font-family: monospace;'>{time_display}</h1>
             <p style='color: white; margin: 0; font-size: 1.1rem;'>Closing at {ORDER_CLOSING_HOUR:02d}:{ORDER_CLOSING_MINUTE:02d}</p>
         </div>
+        <script>
+            setTimeout(function(){{
+                window.parent.location.reload();
+            }}, 1000);
+        </script>
     """, unsafe_allow_html=True)
-    
-    # Auto-refresh every second
-    import time
-    time.sleep(1)
-    st.rerun()
 
 st.markdown("""
     <div style='text-align: center; padding: 1rem; background-color: #e6f7ff; border-radius: 10px; margin-bottom: 2rem;'>

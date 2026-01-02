@@ -160,6 +160,28 @@ CUSTOMER_REVIEWS = [
     }
 ]
 
+# ============ ORDER CLOSING TIME CONFIGURATION ============
+# Set your order closing time here (24-hour format)
+# Example: For 11:30 AM, use hour=11, minute=30
+ORDER_CLOSING_HOUR = 11  # Hour (0-23)
+ORDER_CLOSING_MINUTE = 30  # Minute (0-59)
+# ==========================================================
+
+# Function to calculate time remaining
+def get_time_remaining():
+    berlin_tz = ZoneInfo("Europe/Berlin")
+    now = datetime.now(berlin_tz)
+    
+    # Create closing time for today
+    closing_time = now.replace(hour=ORDER_CLOSING_HOUR, minute=ORDER_CLOSING_MINUTE, second=0, microsecond=0)
+    
+    # If closing time has passed today, show 0
+    if now >= closing_time:
+        return None, True  # None time remaining, orders closed
+    
+    time_remaining = closing_time - now
+    return time_remaining, False
+
 # --- Shared Order List using st.cache_resource ---
 # This list will be initialized once and shared across all user sessions.
 @st.cache_resource
@@ -172,6 +194,48 @@ shared_orders = get_shared_orders()
 # Fun header
 st.markdown("<h1 style='text-align: center; color: #ff6b6b;'>🍜 Thai Lunch Squad 🔥</h1>", unsafe_allow_html=True)
 st.markdown("<h3 style='text-align: center; color: #666;'>Thien Thai Bistro - Let's get this pad thai!</h3>", unsafe_allow_html=True)
+
+# Countdown Timer
+time_remaining, is_closed = get_time_remaining()
+
+if is_closed:
+    st.markdown("""
+        <div style='text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); 
+        border-radius: 15px; margin-bottom: 2rem; border: 3px solid #ff0000;'>
+            <h2 style='color: white; margin: 0;'>⏰ ORDERS CLOSED</h2>
+            <p style='color: white; margin: 0.5rem 0 0 0; font-size: 1.1rem;'>Order deadline has passed. See you next time!</p>
+        </div>
+    """, unsafe_allow_html=True)
+else:
+    hours, remainder = divmod(int(time_remaining.total_seconds()), 3600)
+    minutes, seconds = divmod(remainder, 60)
+    
+    if hours > 0:
+        time_display = f"{hours}h {minutes}m {seconds}s"
+        bg_color = "#28a745"  # Green
+    elif minutes > 30:
+        time_display = f"{minutes}m {seconds}s"
+        bg_color = "#28a745"  # Green
+    elif minutes > 10:
+        time_display = f"{minutes}m {seconds}s"
+        bg_color = "#ffc107"  # Yellow/Orange
+    else:
+        time_display = f"{minutes}m {seconds}s"
+        bg_color = "#ff6b6b"  # Red
+    
+    st.markdown(f"""
+        <div style='text-align: center; padding: 1.5rem; background: linear-gradient(135deg, {bg_color} 0%, {bg_color}dd 100%); 
+        border-radius: 15px; margin-bottom: 2rem; border: 3px solid {bg_color};'>
+            <h2 style='color: white; margin: 0;'>⏰ Time Until Order Closes</h2>
+            <h1 style='color: white; margin: 0.5rem 0; font-size: 3rem; font-family: monospace;'>{time_display}</h1>
+            <p style='color: white; margin: 0; font-size: 1.1rem;'>Closing at {ORDER_CLOSING_HOUR:02d}:{ORDER_CLOSING_MINUTE:02d}</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Auto-refresh every second
+    import time
+    time.sleep(1)
+    st.rerun()
 
 st.markdown("""
     <div style='text-align: center; padding: 1rem; background-color: #e6f7ff; border-radius: 10px; margin-bottom: 2rem;'>
@@ -218,6 +282,11 @@ col1, col2 = st.columns([2, 1])
 
 with col1:
     st.markdown("### 🎯 Place Your Order")
+    
+    # Disable ordering if closed
+    if is_closed:
+        st.warning("⚠️ Ordering is closed for today. The deadline has passed.")
+        st.stop()
 
     with st.form("order_form", clear_on_submit=True):
         name = st.text_input("Your Name 👤", placeholder="Who's hungry?")

@@ -163,8 +163,8 @@ CUSTOMER_REVIEWS = [
 # ============ ORDER CLOSING TIME CONFIGURATION ============
 # Set your order closing time here (24-hour format)
 # Example: For 11:30 AM, use hour=11, minute=30
-ORDER_CLOSING_HOUR = 11  # Hour (0-23)
-ORDER_CLOSING_MINUTE = 30  # Minute (0-59)
+ORDER_CLOSING_HOUR = 13  # Hour (0-23)
+ORDER_CLOSING_MINUTE = 00  # Minute (0-59)
 # ==========================================================
 
 # Function to calculate time remaining

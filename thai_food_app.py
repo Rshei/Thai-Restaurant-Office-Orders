@@ -1,6 +1,8 @@
 prices import streamlit as st
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import pandas as pd
+import json
 
 # Page configuration
 st.set_page_config(page_title="Thai Food Order", page_icon="🍜", layout="wide")
@@ -129,13 +131,54 @@ MENU = {
     "124": {"name": "Erdnuss-Sauce Hühnerbrust paniert kross gebacken", "price": 9.00},
 }
 
-# Initialize session state for orders
-if "orders" not in st.session_state:
-    st.session_state.orders = []
+# Customer Reviews data (delivery-focused)
+CUSTOMER_REVIEWS = [
+    {
+        "customer_name": "Laura W.",
+        "rating": 5,
+        "review_text": "Fast delivery and super friendly courier! Everything arrived warm and on time. Great service!"
+    },
+    {
+        "customer_name": "Michael T.",
+        "rating": 4,
+        "review_text": "Delivery arrived earlier than expected. Smooth and professional handover. Would definitely order again."
+    },
+    {
+        "customer_name": "Sven K.",
+        "rating": 5,
+        "review_text": "The delivery driver was really polite and called ahead when he arrived. Excellent experience!"
+    },
+    {
+        "customer_name": "Julia R.",
+        "rating": 4,
+        "review_text": "Service was quick and organized. Appreciated the updates and the friendly attitude of the delivery person."
+    },
+    {
+        "customer_name": "Daniel B.",
+        "rating": 5,
+        "review_text": "Super reliable! This is the third time I order, and every delivery has been perfectly on time."
+    }
+]
+
+# --- Shared Order List using st.cache_resource ---
+# This list will be initialized once and shared across all user sessions.
+@st.cache_resource
+def get_shared_orders():
+    return []
+
+# Initialize a global variable for shared orders
+shared_orders = get_shared_orders()
 
 # Fun header
 st.markdown("<h1 style='text-align: center; color: #ff6b6b;'>🍜 Thai Lunch Squad 🔥</h1>", unsafe_allow_html=True)
 st.markdown("<h3 style='text-align: center; color: #666;'>Thien Thai Bistro - Let's get this pad thai!</h3>", unsafe_allow_html=True)
+
+st.markdown("""
+    <div style='text-align: center; padding: 1rem; background-color: #e6f7ff; border-radius: 10px; margin-bottom: 2rem;'>
+        <h4 style='color: #007bff;'>Your Office Food Delivery Just Got Easier!</h4>
+        <p style='color: #333;'>Simply choose your favorites from our delicious menu, place your order, and relax! We'll deliver fresh, hot food right to your office. Remember: cash payments only, and please show some love to our delivery heroes with a tip! 🛵💰</p>
+    </div>
+""", unsafe_allow_html=True)
 
 # Menu link section
 MENU_URL = "https://www.google.com/maps/place/Thien+Thai+Bistro/@52.5364437,13.2723721,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDZruezGQ!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAG0ilSyjaUPfX_bg9cANspvtJgqf6qGUB3hTyNN8bkwRMCiCzpOZQn7hvozHQvIqqUefUHo5ywJ6ZYweysXOCSP05KNw_VqQlybBnJJgbh2Dn-3jtWL6ERtiGrE_n_geRKhC-eDcqPV7%3Dw146-h195-k-no!7i3000!8i4000!4m10!1m2!2m1!1ssiemens+damm!3m6!1s0x47a856c7885ec39d:0xe8d8c1bdc6419318!8m2!3d52.5362941!4d13.272357!10e9!16s%2Fg%2F11bxc5hddn?entry=ttu&g_ep=EgoyMDI1MTIwMi4wIKXMDSoASAFQAw%3D%3D"
@@ -166,6 +209,10 @@ for key, value in sorted(MENU.items(), key=lambda x: int(''.join(filter(str.isdi
     label = f"{key}. {value['name']} - €{value['price']:.2f}"
     dish_options.append((label, key))
 
+# Add a blank first option
+dish_options = [(" ", None)] + dish_options
+labels = [opt[0] for opt in dish_options]
+
 # Main layout: Order form on left, Order summary on right
 col1, col2 = st.columns([2, 1])
 
@@ -175,16 +222,25 @@ with col1:
     with st.form("order_form", clear_on_submit=True):
         name = st.text_input("Your Name 👤", placeholder="Who's hungry?")
 
-        # Select dish instead of free-text number
+        # Select dish with blank default
         selected_label = st.selectbox(
             "Choose your dish 🍽️",
-            options=[opt[0] for opt in dish_options],
+            options=labels,
             index=0
         )
-        # Map back to menu number
-        selected_key = next(k for (label, k) in dish_options if label == selected_label)
-        dish_info = MENU[selected_key]
-        st.info(f"✨ You chose: {selected_key}. {dish_info['name']} - €{dish_info['price']:.2f}")
+
+        # Map back to menu number (None if blank)
+        selected_key = next(
+            (k for (label, k) in dish_options if label == selected_label),
+            None
+        )
+
+        if selected_key is not None:
+            dish_info = MENU[selected_key]
+            st.info(f"✨ You chose: {selected_key}. {dish_info['name']} - €{dish_info['price']:.2f}")
+        else:
+            dish_info = None
+            st.info("👉 Please choose a dish from the list.")
 
         special_requests = st.text_area(
             "Special Requests 💬",
@@ -195,9 +251,12 @@ with col1:
         submitted = st.form_submit_button("🚀 Add My Order!", use_container_width=True)
 
         if submitted:
-            if name:
+            if not name:
+                st.error("⚠️ Hold up! Please fill in your name!")
+            elif dish_info is None:
+                st.error("⚠️ Please choose a dish before adding the order!")
+            else:
                 total_price = dish_info["price"]
-
                 dish_display = dish_info["name"]
 
                 order = {
@@ -205,25 +264,22 @@ with col1:
                     "dish": f"{selected_key}. {dish_display}",
                     "requests": special_requests if special_requests else "No special requests",
                     "price": total_price,
-                    "time": datetime.now().strftime("%H:%M"),
+                    "time": datetime.now(ZoneInfo("Europe/Berlin")).strftime("%H:%M"),
                 }
-                st.session_state.orders.append(order)
-                st.balloons()
+                shared_orders.append(order)
                 st.success(f"✨ Awesome! Added {name}'s order!")
-            else:
-                st.error("⚠️ Hold up! Please fill in your name!")
 
 with col2:
     st.markdown("### 📋 The Squad's Orders")
 
-    if st.session_state.orders:
-        df = pd.DataFrame(st.session_state.orders)
+    if shared_orders:
+        df = pd.DataFrame(shared_orders)
         df = df[["name", "dish", "requests", "price", "time"]]
         df.columns = ["Name", "Dish", "Notes", "€", "Time"]
 
         st.dataframe(df, use_container_width=True, hide_index=True)
 
-        total = sum(order["price"] for order in st.session_state.orders)
+        total = sum(order["price"] for order in shared_orders)
         st.markdown(f"""
             <div style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
             padding: 1rem; border-radius: 10px; text-align: center; margin: 1rem 0;'>
@@ -233,23 +289,30 @@ with col2:
         """, unsafe_allow_html=True)
 
         st.markdown("---")
-        order_to_remove = st.number_input(
-            "Remove order (row #, starting at 0)",
-            min_value=0,
-            max_value=len(st.session_state.orders) - 1,
-            step=1,
+        name_to_remove = st.text_input(
+            "Enter name to remove order: ",
+            key="remove_order_by_name_input"
         )
-        if st.button("🗑️ Remove Order"):
-            st.session_state.orders.pop(order_to_remove)
+
+        if st.button("🗑️ Remove Order by Name"):
+            if name_to_remove:
+                original_len = len(shared_orders)
+                # Find and remove the first order matching the name
+                for i, order in enumerate(shared_orders):
+                    if order["name"].lower() == name_to_remove.lower():
+                        shared_orders.pop(i)
+                        st.success(f"Removed {name_to_remove}'s order.")
+                        break
+                if len(shared_orders) == original_len:
+                    st.warning(f"No order found for {name_to_remove}.")
+            else:
+                st.warning("Please enter a name to remove an order.")
             st.rerun()
 
-        if st.button("💣 Clear Everything", use_container_width=True):
-            st.session_state.orders = []
-            st.rerun()
 
         if st.button("📋 Copy Order List", use_container_width=True):
             summary = "🍜 THAI FOOD SQUAD ORDERS 🍜\n" + "=" * 35 + "\n\n"
-            for idx, order in enumerate(st.session_state.orders, 1):
+            for idx, order in enumerate(shared_orders, 1):
                 summary += f"{idx}. {order['name']}\n"
                 summary += f"   🍽️ {order['dish']}\n"
                 summary += f"   💬 {order['requests']}\n"
@@ -259,17 +322,19 @@ with col2:
 
             st.code(summary, language=None)
     else:
-        st.markdown("""
-            <div style='text-align: center; padding: 2rem; background-color: #fff3cd; 
-            border-radius: 10px; border: 2px dashed #ffc107;'>
-                <h3>🤔 No orders yet!</h3>
-                <p>Be the first one to order! 🚀</p>
-            </div>
-        """, unsafe_allow_html=True)
+        st.markdown("No order yet!")
+
+# Customer Reviews Section
+st.markdown("--- ✨ What Our Customers Say! ✨ ---")
+
+for review in CUSTOMER_REVIEWS:
+    st.markdown(f"**{review['customer_name']}** - {'⭐' * review['rating']}")
+    st.info(f"_{review['review_text']}_")
+    st.markdown("\n")  # Add some spacing between reviews
 
 # Footer
 st.markdown("---")
 st.markdown(
-    "<p style='text-align: center; color: #666;'>🚶 Your friendly office delivery service | 💶 Cash only vibes</p>",
+    "<p style='text-align: center; color: #666;'>🚶This app built by Your friendly office delivery service | 💶 Cash only vibes</p>",
     unsafe_allow_html=True,
 )

@@ -1,4 +1,4 @@
-prices import streamlit as st
+import streamlit as st
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import pandas as pd

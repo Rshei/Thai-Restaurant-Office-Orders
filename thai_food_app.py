@@ -35,15 +35,14 @@ st.markdown("""
 # MENU DATABASE - updated to match restaurant menu
 MENU = {
     # Suppen u. Vorspeisen
-    "1":  {"name": "Eierblumensuppe (m. Hühnerfleisch)", "price": 4.00},
-    "3":  {"name": "Glasnudeln-Suppe (mit Hühnerfleisch)", "price": 4.00},
-    "5":  {"name": "Tom Kha-Gai Ram Suppe (m. Hühnerfleisch, Kokosmilch)", "price": 4.50},
-    "6":  {"name": "Tom Yam-Gung Thai-Suppe (m. Garnelen)", "price": 4.50},
-    "7":  {"name": "Sauer-Scharf-Suppe (m. Hühnerfleisch)", "price": 4.00},
-    "8":  {"name": "Wan-Tan-Suppe (m. Hühnerfleisch-Füllung)", "price": 4.00},
-    "18": {"name": "Frühlingsrollen vegetarisch (8 Stück)", "price": 4.00},
-    "19": {"name": "Wantan gebacken (6 Stück)", "price": 4.00},
-    "20": {"name": "Krupuk Garnelenchip", "price": 3.00},
+    "1":  {"name": "Eierblumensuppe (m. Hühnerfleisch)", "price": 3.50},
+    "5":  {"name": "Tom Kha Gai Suppe (m. Hühnerfl. u. Kokosmilch)", "price": 4.00},
+    "6":  {"name": "Tom Yam-Gung Thai-Suppe mit Garnelen", "price": 4.00},
+    "7":  {"name": "Sauer-Scharf-Suppe (m. Hühnerfleisch)", "price": 3.50},
+    "8":  {"name": "Wan-Tan-Suppe (m. Hühnerfleisch-Füllung)", "price": 3.50},
+    "9":  {"name": "Glasnudeln-Suppe mit Hühnerfleisch", "price": 3.50},
+    "18": {"name": "Frühlingsrollen vegetarisch (8 Stück)", "price": 3.50},
+    "19": {"name": "Wan-Tan gebacken (6 Stück)", "price": 3.50},
 
     # Gebratene Nudeln
     "21": {"name": "Gebratene Nudeln m. Hühnerfleisch (klein)", "price": 6.00},

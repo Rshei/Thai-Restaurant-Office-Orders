@@ -162,7 +162,7 @@ CUSTOMER_REVIEWS = [
 # ============ ORDER CLOSING TIME CONFIGURATION ============
 # Set your order closing time here (24-hour format)
 # Example: For 11:30 AM, use hour=11, minute=30
-ORDER_CLOSING_HOUR = 12  # Hour (0-23)
+ORDER_CLOSING_HOUR = 14  # Hour (0-23)
 ORDER_CLOSING_MINUTE = 00  # Minute (0-59)
 # ==========================================================
 
@@ -285,57 +285,58 @@ with col1:
     # Disable ordering if closed
     if is_closed:
         st.warning("⚠️ Ordering is closed for today. The deadline has passed.")
-        st.stop()
+        st.info("📋 You can still view all orders in the summary panel on the right.")
+    
+    if not is_closed:
+        with st.form("order_form", clear_on_submit=True):
+            name = st.text_input("Your Name 👤", placeholder="Who's hungry?")
 
-    with st.form("order_form", clear_on_submit=True):
-        name = st.text_input("Your Name 👤", placeholder="Who's hungry?")
+            # Select dish with blank default
+            selected_label = st.selectbox(
+                "Choose your dish 🍽️",
+                options=labels,
+                index=0
+            )
 
-        # Select dish with blank default
-        selected_label = st.selectbox(
-            "Choose your dish 🍽️",
-            options=labels,
-            index=0
-        )
+            # Map back to menu number (None if blank)
+            selected_key = next(
+                (k for (label, k) in dish_options if label == selected_label),
+                None
+            )
 
-        # Map back to menu number (None if blank)
-        selected_key = next(
-            (k for (label, k) in dish_options if label == selected_label),
-            None
-        )
-
-        if selected_key is not None:
-            dish_info = MENU[selected_key]
-            st.info(f"✨ You chose: {selected_key}. {dish_info['name']} - €{dish_info['price']:.2f}")
-        else:
-            dish_info = None
-            st.info("👉 Please choose a dish from the list.")
-
-        special_requests = st.text_area(
-            "Special Requests 💬",
-            placeholder="Extra veggies? No peanuts? Make it your own!",
-            height=80
-        )
-
-        submitted = st.form_submit_button("🚀 Add My Order!", use_container_width=True)
-
-        if submitted:
-            if not name:
-                st.error("⚠️ Hold up! Please fill in your name!")
-            elif dish_info is None:
-                st.error("⚠️ Please choose a dish before adding the order!")
+            if selected_key is not None:
+                dish_info = MENU[selected_key]
+                st.info(f"✨ You chose: {selected_key}. {dish_info['name']} - €{dish_info['price']:.2f}")
             else:
-                total_price = dish_info["price"]
-                dish_display = dish_info["name"]
+                dish_info = None
+                st.info("👉 Please choose a dish from the list.")
 
-                order = {
-                    "name": name,
-                    "dish": f"{selected_key}. {dish_display}",
-                    "requests": special_requests if special_requests else "No special requests",
-                    "price": total_price,
-                    "time": datetime.now(ZoneInfo("Europe/Berlin")).strftime("%H:%M"),
-                }
-                shared_orders.append(order)
-                st.success(f"✨ Awesome! Added {name}'s order!")
+            special_requests = st.text_area(
+                "Special Requests 💬",
+                placeholder="Extra veggies? No peanuts? Make it your own!",
+                height=80
+            )
+
+            submitted = st.form_submit_button("🚀 Add My Order!", use_container_width=True)
+
+            if submitted:
+                if not name:
+                    st.error("⚠️ Hold up! Please fill in your name!")
+                elif dish_info is None:
+                    st.error("⚠️ Please choose a dish before adding the order!")
+                else:
+                    total_price = dish_info["price"]
+                    dish_display = dish_info["name"]
+
+                    order = {
+                        "name": name,
+                        "dish": f"{selected_key}. {dish_display}",
+                        "requests": special_requests if special_requests else "No special requests",
+                        "price": total_price,
+                        "time": datetime.now(ZoneInfo("Europe/Berlin")).strftime("%H:%M"),
+                    }
+                    shared_orders.append(order)
+                    st.success(f"✨ Awesome! Added {name}'s order!")
 
 with col2:
     st.markdown("### 📋 The Squad's Orders")

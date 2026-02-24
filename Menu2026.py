@@ -71,3 +71,5 @@ menu_items = [
     {"number": "123", "dish": "Ente paniert kross gebacken", "price_eur": 11.00},
     {"number": "124", "dish": "Hühnerbrust paniert kross gebacken", "price_eur": 10.00}
 ]
+
+

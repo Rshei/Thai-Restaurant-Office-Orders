@@ -1,6 +1,8 @@
 import streamlit as st
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from pathlib import Path
+from html import escape
 import pandas as pd
 import json
 
@@ -131,34 +133,7 @@ MENU = {
 }
 
 
-# Customer Reviews data (delivery-focused)
-CUSTOMER_REVIEWS = [
-    {
-        "customer_name": "Laura W.",
-        "rating": 5,
-        "review_text": "Fast delivery and super friendly courier! Everything arrived warm and on time. Great service!"
-    },
-    {
-        "customer_name": "Michael T.",
-        "rating": 4,
-        "review_text": "Delivery arrived earlier than expected. Smooth and professional handover. Would definitely order again."
-    },
-    {
-        "customer_name": "Sven K.",
-        "rating": 5,
-        "review_text": "The delivery driver was really polite and called ahead when he arrived. Excellent experience!"
-    },
-    {
-        "customer_name": "Julia R.",
-        "rating": 4,
-        "review_text": "Service was quick and organized. Appreciated the updates and the friendly attitude of the delivery person."
-    },
-    {
-        "customer_name": "Daniel B.",
-        "rating": 5,
-        "review_text": "Super reliable! This is the third time I order, and every delivery has been perfectly on time."
-    }
-]
+REVIEWS_FILE = Path(__file__).with_name("customer_reviews.json")
 
 # ============ ORDER CLOSING TIME CONFIGURATION ============
 # Set your order closing time here (24-hour format)
@@ -181,6 +156,37 @@ def get_time_remaining():
     
     time_remaining = closing_time - now
     return time_remaining, False
+
+
+def load_reviews():
+    if not REVIEWS_FILE.exists():
+        return []
+
+    try:
+        with REVIEWS_FILE.open("r", encoding="utf-8") as review_file:
+            reviews = json.load(review_file)
+    except (OSError, json.JSONDecodeError):
+        return []
+
+    if not isinstance(reviews, list):
+        return []
+
+    return reviews
+
+
+def save_reviews(reviews):
+    with REVIEWS_FILE.open("w", encoding="utf-8") as review_file:
+        json.dump(reviews, review_file, ensure_ascii=False, indent=2)
+
+
+def add_review(customer_name, review_text):
+    reviews = load_reviews()
+    reviews.insert(0, {
+        "customer_name": customer_name.strip(),
+        "review_text": review_text.strip(),
+        "created_at": datetime.now(ZoneInfo("Europe/Berlin")).strftime("%Y-%m-%d %H:%M"),
+    })
+    save_reviews(reviews)
 
 # --- Shared Order List using st.cache_resource ---
 # This list will be initialized once and shared across all user sessions.
@@ -243,6 +249,55 @@ st.markdown("""
         <p style='color: #333;'>Simply choose your favorites from our delicious menu, place your order, and relax! We'll deliver fresh, hot food right to your office. Remember: cash payments only, and please show some love to our delivery heroes with a tip! 🛵💰</p>
     </div>
 """, unsafe_allow_html=True)
+
+reviews = load_reviews()
+
+st.markdown("## Customer Reviews")
+
+if reviews:
+    stat_col1, stat_col2 = st.columns(2)
+    stat_col1.metric("Total Reviews", len(reviews))
+    stat_col2.metric("Latest Review", reviews[0]["created_at"])
+
+    review_columns = st.columns(2)
+    for index, review in enumerate(reviews):
+        customer_name = escape(str(review.get("customer_name", "Anonymous")))
+        review_text = escape(str(review.get("review_text", "")))
+        created_at = escape(str(review.get("created_at", "Recently")))
+
+        with review_columns[index % 2]:
+            st.markdown(
+                f"""
+                <div style='background: white; border-radius: 14px; padding: 1rem; margin-bottom: 1rem; border: 1px solid #f1f1f1; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);'>
+                    <strong>{customer_name}</strong>
+                    <p style='margin: 0.75rem 0 0 0; color: #333;'>{review_text}</p>
+                    <p style='margin: 0.75rem 0 0 0; color: #777; font-size: 0.85rem;'>Posted {created_at}</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+else:
+    st.info("No customer reviews yet. Be the first to leave one below.")
+
+with st.form("review_form", clear_on_submit=True):
+    st.markdown("### Leave a Review")
+    reviewer_name = st.text_input("Your Name", placeholder="Add your name")
+    review_message = st.text_area(
+        "Your Review",
+        placeholder="Share what people should know about the food or delivery.",
+        height=100,
+    )
+    review_submitted = st.form_submit_button("Post Review", use_container_width=True)
+
+    if review_submitted:
+        if not reviewer_name.strip():
+            st.error("Please add your name before posting a review.")
+        elif not review_message.strip():
+            st.error("Please write a short review before posting.")
+        else:
+            add_review(reviewer_name, review_message)
+            st.success("Your review is now live for everyone to see.")
+            st.rerun()
 
 # Menu link section
 MENU_URL = "https://www.google.com/maps/place/Thien+Thai+Bistro/@52.5364437,13.2723721,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDZruezGQ!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FAG0ilSyjaUPfX_bg9cANspvtJgqf6qGUB3hTyNN8bkwRMCiCzpOZQn7hvozHQvIqqUefUHo5ywJ6ZYweysXOCSP05KNw_VqQlybBnJJgbh2Dn-3jtWL6ERtiGrE_n_geRKhC-eDcqPV7%3Dw146-h195-k-no!7i3000!8i4000!4m10!1m2!2m1!1ssiemens+damm!3m6!1s0x47a856c7885ec39d:0xe8d8c1bdc6419318!8m2!3d52.5362941!4d13.272357!10e9!16s%2Fg%2F11bxc5hddn?entry=ttu&g_ep=EgoyMDI1MTIwMi4wIKXMDSoASAFQAw%3D%3D"
@@ -393,14 +448,6 @@ with col2:
             st.code(summary, language=None)
     else:
         st.markdown("No order yet!")
-
-# Customer Reviews Section
-st.markdown("--- ✨ What Our Customers Say! ✨ ---")
-
-for review in CUSTOMER_REVIEWS:
-    st.markdown(f"**{review['customer_name']}** - {'⭐' * review['rating']}")
-    st.info(f"_{review['review_text']}_")
-    st.markdown("\n")  # Add some spacing between reviews
 
 # Footer
 st.markdown("---")
